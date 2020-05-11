@@ -4,29 +4,36 @@
       <loading v-if="isLoading" />
     </v-overlay>
     <v-container>
-      <v-card v-show="allChapters.length > 0" max-width="600" class="mx-auto">
-        <v-list two-line subheader>
-          <v-subheader style="font-size: 14pt" inset>{{title}}</v-subheader>
+      <v-card
+        v-show="allChapters.length > 0"
+        max-width="1200"
+        class="mx-auto"
+        style="margin-top: -90px"
+      >
+        <v-card-text>
+          <v-list two-line subheader>
+            <span style="font-size: 14pt;color: color: rgba(255, 255, 255, 0.7);" inset>{{title}}</span>
 
-          <v-list-item v-for="(item, i) in allChapters" :key="i">
-            <v-list-item-avatar>
-              <v-img :src="require('../static/logos/tdg.png')"></v-img>
-            </v-list-item-avatar>
+            <v-list-item v-for="(item, i) in allChapters" @click="getRelease(item.releases, {name: item.name, number: item.number})" :key="i">
+              <v-list-item-avatar size="80">
+                <v-img :src="require('../static/logos/tdg.png')"></v-img>
+              </v-list-item-avatar>
 
-            <v-list-item-content>
-              <v-list-item-title>{{'Capítulo ' + item.number}}</v-list-item-title>
-              <span class="hint-text">{{'Disponível em: ' + $mask.dateFormat(item.date_created)}}</span>
-            </v-list-item-content>
+              <v-list-item-content>
+                <span :style="isMobile ? 'font-size: 13pt' : 'font-size: 16pt'">{{'Capítulo ' + item.number}}</span>
+                <span class="hint-text">{{'Disponível em: ' + $mask.dateFormat(item.date_created)}}</span>
+              </v-list-item-content>
 
-            <v-list-item-action
-              @click="getRelease(item.releases, {name: item.name, number: item.number})"
-            >
-              <v-btn icon>
-                <v-icon>fas fa-book-reader</v-icon>
-              </v-btn>
-            </v-list-item-action>
-          </v-list-item>
-        </v-list>
+              <v-list-item-action
+                @click="getRelease(item.releases, {name: item.name, number: item.number})"
+              >
+                <v-btn icon>
+                  <v-icon>fas fa-book-reader</v-icon>
+                </v-btn>
+              </v-list-item-action>
+            </v-list-item>
+          </v-list>
+        </v-card-text>
       </v-card>
     </v-container>
   </v-content>
@@ -81,6 +88,7 @@ export default {
         .get(`/all/chapters_list.json?page=${page}&id_serie=${this.id_serie}`)
         .catch(err => {
           this.isLoading = false;
+          console.error(err.response);
           return err;
         });
       console.log("response", response);
@@ -119,6 +127,6 @@ export default {
 .hint-text {
   color: rgba(255, 255, 255, 0.7);
   line-height: 1.2;
-  font-size: 0.875rem;
+  font-size: 0.995rem;
 }
 </style>

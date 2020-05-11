@@ -1,9 +1,11 @@
 export const state = () => ({
     id_release: '',
     arrayIds: ["7702", "2412"],
-    favourites: [],
+    comics: [],
     hash_release: '',
-    infoChapter: {}
+    infoChapter: {},
+    imgComics: [],
+    isMobile: null
 })
 
 export const mutations = {
@@ -11,7 +13,16 @@ export const mutations = {
         state.id_release = payload
     },
     SET_COMIC(state, obj) {
-        state.favourites.push(obj)
+        state.comics.push(obj)
+    },
+    IMG_COMIC(state, value) {
+        let indexId = null;
+        state.comics.forEach((res, index) => {
+            if (res.id_serie === value.id) {
+                indexId = index
+            }
+        })
+        state.comics[indexId].img = value
     },
     REMOVE_ID(state, id) {
         let indexId = null;
@@ -27,6 +38,9 @@ export const mutations = {
     },
     INFO_CHAPTER(state, payload) {
         state.infoChapter = payload
+    },
+    SET_MOBILE(state, value) {
+        state.isMobile = value
     }
 }
 

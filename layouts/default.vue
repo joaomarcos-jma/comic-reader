@@ -1,36 +1,50 @@
 <template>
   <v-app dark>
-    <v-navigation-drawer class="transparent" v-model="drawer" :mini-variant="miniVariant" fixed app>
-      <div style="margin-top: 30px" class="center-block logo;">
-        <v-list-item class="px-2">
-          <!-- <v-list-item-avatar>
-            <v-img v-if="avatar" :src="avatar"></v-img>
-          </v-list-item-avatar> -->
-          <v-list-item-content >
-            <v-list-item-title style="font-size: 14pt">{{'Bem vindo ao Comic Reader'}}</v-list-item-title>
-          </v-list-item-content>
-        </v-list-item>
-      </div>
+    <v-app-bar
+      v-if="showMenu && isMobile"
+      dark
+      :class="{'transparent': !showNavbar}"
+      :hide-on-scroll="true"
+      :src="require('../static/solo.png')"
+      app
+    >
+      <v-toolbar-title class="text-center">
+        <v-avatar size="70">
+          <v-img :src="require('../static/logos/logo_oficial_comic_reader.png')"></v-img>
+        </v-avatar>
+      </v-toolbar-title>
 
-      <v-list>
-        <v-list-item v-for="(item, i) in items" :key="i" :to="item.to" router exact>
-          <v-list-item-action>
-            <v-icon>{{ item.icon }}</v-icon>
-          </v-list-item-action>
-          <v-list-item-content>
-            <v-list-item-title v-text="item.title" />
-          </v-list-item-content>
-        </v-list-item>
-      </v-list>
-    </v-navigation-drawer>
-    <v-app-bar class="transparent" :clipped-left="clipped" fixed app>
-      <v-app-bar-nav-icon @click.stop="drawer = !drawer" />
-      <v-btn icon @click.stop="miniVariant = !miniVariant">
-        <v-icon>mdi-{{ `chevron-${miniVariant ? 'right' : 'left'}` }}</v-icon>
-      </v-btn>
-      <v-toolbar-title v-text="title" />
+      <template v-slot:extension>
+        <v-tabs v-model="tab" align-with-title>
+          <v-tab v-for="item in items" :key="item.tab" :to="item.to">{{ item.title }}</v-tab>
+        </v-tabs>
+      </template>
     </v-app-bar>
-    <v-content style="margin-top: -30px" class="background-home">
+    <v-app-bar
+      v-if="showMenu && !isMobile"
+      absolute
+      dark
+      hide-on-scroll
+      app
+      scroll-target="#scrolling-techniques-4"
+    >
+      <v-spacer></v-spacer>
+      <v-toolbar-title style="margin-top: 15px;">
+        <v-avatar size="80">
+          <v-img :src="require('../static/logos/logo_oficial_comic_reader.png')"></v-img>
+        </v-avatar>
+      </v-toolbar-title>
+      <template v-slot:extension>
+        <v-tabs style="margin-top: 3px;margin-left: 30%" v-model="tab" align-with-title>
+          <v-tab v-for="item in items" :key="item.tab" :to="item.to">{{ item.title }}</v-tab>
+        </v-tabs>
+      </template>
+      <v-spacer></v-spacer>
+      <v-btn x-large icon>
+        <v-icon>mdi-magnify</v-icon>
+      </v-btn>
+    </v-app-bar>
+    <v-content>
       <v-container>
         <nuxt />
       </v-container>
@@ -40,37 +54,78 @@
 
 <script>
 export default {
-  data() {
-    return {
-      clipped: false,
-      drawer: false,
-      fixed: false,
-      items: [
-        {
-          icon: "mdi-apps",
-          title: "Welcome",
-          to: "/"
-        },
-        {
-          icon: "mdi-chart-bubble",
-          title: "Inspire",
-          to: "/inspire"
-        }
-      ],
-      miniVariant: false,
-      right: true,
-      rightDrawer: false,
-      title: "Comic Reader"
-    };
+  data: () => ({
+    tab: null,
+    clipped: false,
+    drawer: false,
+    fixed: false,
+    sideNav: false,
+    items: [
+      {
+        icon: "mdi-apps",
+        title: "Home",
+        to: "/home"
+      },
+      {
+        icon: "mdi-chart-bubble",
+        title: "Comics",
+        to: "/comics"
+      }
+    ],
+    miniVariant: false,
+    right: true,
+    rightDrawer: false,
+    title: "Comic Reader",
+    showNavbar: true,
+    lastScrollPosition: 0
+  }),
+  mounted() {
+    this.onResize();
+    window.addEventListener("resize", this.onResize, { passive: true });
+    window.addEventListener("scroll", this.onScroll);
+  },
+  beforeDestroy() {
+    window.removeEventListener("scroll", this.onScroll);
+    if (typeof window !== "undefined") {
+      window.removeEventListener("resize", this.onResize, { passive: true });
+    }
+  },
+  methods: {
+    onResize() {
+      let isMobile = window.innerWidth < 600;
+      this.$store.commit("SET_MOBILE", isMobile);
+    },
+    onScroll() {
+      const currentScrollPosition =
+        window.pageYOffset || document.documentElement.scrollTop;
+      if (currentScrollPosition < 0) {
+        return;
+      }
+      if (Math.abs(currentScrollPosition - this.lastScrollPosition) < 60) {
+        return;
+      }
+      this.showNavbar = currentScrollPosition < this.lastScrollPosition;
+      this.lastScrollPosition = currentScrollPosition;
+    }
+  },
+  computed: {
+    showMenu() {
+      if (!["index", "viewer"].includes(this.$route.name)) {
+        return true;
+      }
+    },
+    isMobile() {
+      return this.$store.state.isMobile;
+    }
   }
 };
 </script>
 <style>
 .background-home {
   /* The image used */
-  background-image: url("../static/solo.png");
+  background-color: #b96e4b;
   /* Half height */
-  height: 100%;
+  height: auto;
   max-width: auto;
   /* Center and scale the image nicely */
   background-repeat: no-repeat;

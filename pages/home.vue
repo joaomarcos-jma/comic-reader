@@ -1,48 +1,29 @@
 <template>
   <v-content>
-    <v-layout>
+    <v-overlay class="fill-height" :value="isLoading">
+      <loading v-if="isLoading" />
+    </v-overlay>
+    <v-layout v-show="!isLoading">
       <v-flex>
         <v-carousel
-          style="margin-top: -30px"
+          style="margin-top: -100px"
           height="250px"
           cycle
           hide-delimiter-background
           show-arrows-on-hover
         >
           <v-carousel-item v-for="(slide, i) of featured" :key="i">
-            <div style="text-align: center" class="back-cover">
-              <img @click="viewFeature(slide)" style="height: 250px;" :src="slide.featured_image" />
+            <div style="text-align: center" :class="isMobile ? 'carousel-mobile' : 'carousel'">
+              <v-img v-show="isMobile" @click="viewFeature(slide)" :src="slide.featured_image"></v-img>
+              <img v-show="!isMobile" @click="viewFeature(slide)" :src="slide.featured_image" />
             </div>
             <!-- <v-row class="fill-height" align="center" justify="center">
             </v-row>-->
           </v-carousel-item>
         </v-carousel>
         <v-container>
-          <v-row class="mb-6" no-gutters>
-            <v-col sm="5" md="8">
-              <v-card class="pa-2" outlined tile>
-                <h3>Sugestoes de Leituras</h3>
-                <v-list three-line>
-                  <template v-for="(item, index) in items">
-                    <v-subheader v-if="item.header" :key="item.header" v-text="item.header"></v-subheader>
-
-                    <v-divider v-else-if="item.divider" :key="index" :inset="item.inset"></v-divider>
-
-                    <v-list-item v-else :key="item.title">
-                      <v-list-item-avatar>
-                        <v-img :src="item.avatar"></v-img>
-                      </v-list-item-avatar>
-
-                      <v-list-item-content>
-                        <v-list-item-title v-html="item.title"></v-list-item-title>
-                        <v-list-item-subtitle v-html="item.subtitle"></v-list-item-subtitle>
-                      </v-list-item-content>
-                    </v-list-item>
-                  </template>
-                </v-list>
-              </v-card>
-            </v-col>
-            <v-col sm="5" offset-sm="2" md="4" offset-md="0">
+          <v-row no-gutters>
+            <v-col>
               <v-card class="pa-2" outlined tile>
                 <h3>Últimas Atualizações</h3>
                 <v-list subheader>
@@ -58,29 +39,64 @@
                       <div>
                         <span class="font-weight-bold">{{item.name}}</span>
                       </div>
-                      <img style="height: 180px;width: 180px" :src="item.image" />
+                      <img style="height: 300px;width: 255px" :src="item.image" />
                     </v-col>
-                    <v-col sm="5" offset-sm="2" md="4" offset-md="0">
-                      <!-- <div>
-                        <span>teste</span>
-                      </div>-->
-                      <v-container>
-                        <div
-                          style="margin: 2px;margin-top: 13px;display: inline-block"
-                          v-for="(cap, i) in item.chapters"
-                          :key="i"
+
+                    <v-container>
+                      <div
+                        style="margin: 2px;margin-top: 5px;display: inline-block"
+                        v-for="(cap, i) in item.chapters"
+                        :key="i"
+                      >
+                        <!-- <span v-if="i < 3">{{i + 1 + "Eu"}}</span> -->
+                        <v-btn
+                          @click="getRelease(item, cap)"
+                          style="margin-bottom: 5px"
+                          v-if="i < 6"
                         >
-                          <!-- <span v-if="i < 3">{{i + 1 + "Eu"}}</span> -->
-                          <v-btn style="margin-bottom: 5px" v-if="i < 4">{{cap.number}}</v-btn>
-                        </div>
-                      </v-container>
-                    </v-col>
+                          <span style="font-size:15pt" class="font-weight-bold">{{cap.number}}</span>
+                        </v-btn>
+                      </div>
+                    </v-container>
+                    <!-- <v-col sm="5" offset-sm="2" md="4" offset-md="0">
+                     
+                    </v-col>-->
                     <!-- <div v-for="(cap, i) in item.chapters" :key="i">
                           <div class="text-center">
                             <v-btn v-if="i < 2">{{cap.number}}</v-btn>
                           </div>
                     </div>-->
                   </v-row>
+                </v-list>
+              </v-card>
+            </v-col>
+            <v-col order="12">
+              <v-card class="pa-2" outlined tile>Second, but last</v-card>
+            </v-col>
+            <v-col order="1">
+              <v-card class="pa-2" outlined tile>
+                <h3>Sugestoes de Leituras</h3>
+                <v-list three-line>
+                  <v-subheader>Enjoy</v-subheader>
+                  <template v-for="(item, index) in comics">
+                    <div :key="item.name">
+                      <span class="font-weight-bold">{{item.name}}</span>
+                    </div>
+
+                    <!-- <v-divider :key="index" inset></v-divider> -->
+
+                    <v-list-item :key="index">
+                      <img
+                        style="height: 300px;width: 255px"
+                        src="https://i1.wp.com/static3.leitor.net/covers/Nx18z6-pxIjlGM7Vwfjshw/7726/external_cover.jpg"
+                      />
+
+                      <v-list-item-content>
+                        <v-list-item-title v-html="item.title"></v-list-item-title>
+                        <v-list-item-subtitle v-html="item.subtitle"></v-list-item-subtitle>
+                      </v-list-item-content>
+                    </v-list-item>
+                  </template>
                 </v-list>
               </v-card>
             </v-col>
@@ -91,65 +107,36 @@
   </v-content>
 </template>
 <script>
+import Loading from "~/components/Loading";
+import cloneDeep from "lodash/cloneDeep";
+import constants from "../shared/constants";
+
 export default {
+  components: { Loading },
   data() {
     return {
       featured: [],
       favorites: [],
       releases: [],
-      isLoading: false,
-      items: [
-        { header: "Today" },
-        {
-          avatar: "https://cdn.vuetifyjs.com/images/lists/1.jpg",
-          title: "Brunch this weekend?",
-          subtitle:
-            "<span class='text--primary'>Ali Connors</span> &mdash; I'll be in your neighborhood doing errands this weekend. Do you want to hang out?"
-        },
-        { divider: true, inset: true },
-        {
-          avatar: "https://cdn.vuetifyjs.com/images/lists/2.jpg",
-          title: 'Summer BBQ <span class="grey--text text--lighten-1">4</span>',
-          subtitle:
-            "<span class='text--primary'>to Alex, Scott, Jennifer</span> &mdash; Wish I could come, but I'm out of town this weekend."
-        },
-        { divider: true, inset: true },
-        {
-          avatar: "https://cdn.vuetifyjs.com/images/lists/3.jpg",
-          title: "Oui oui",
-          subtitle:
-            "<span class='text--primary'>Sandra Adams</span> &mdash; Do you have Paris recommendations? Have you ever been?"
-        },
-        { divider: true, inset: true },
-        {
-          avatar: "https://cdn.vuetifyjs.com/images/lists/4.jpg",
-          title: "Birthday gift",
-          subtitle:
-            "<span class='text--primary'>Trevor Hansen</span> &mdash; Have any ideas about what we should get Heidi for her birthday?"
-        },
-        { divider: true, inset: true },
-        {
-          avatar: "https://cdn.vuetifyjs.com/images/lists/5.jpg",
-          title: "Recipe to try",
-          subtitle:
-            "<span class='text--primary'>Britta Holt</span> &mdash; We should eat this: Grate, Squash, Corn, and tomatillo Tacos."
-        }
-      ]
+      base_img: constants.BASE_IMG,
+      isLoading: false
     };
   },
   mounted() {
+    // this.isLoading = true;
     this.getFeatured();
     this.getReleases();
     this.listFavorites();
   },
-  watch: {
-    comics(val) {
-      console.log("Comic", val);
-    }
-  },
   computed: {
     comics() {
-      return this.$store.state.favourites;
+      return this.$store.state.comics;
+    },
+    isMobile() {
+      return this.$store.state.isMobile;
+    },
+    comicCloning() {
+      return cloneDeep(this.$store.state.comics);
     }
   },
   methods: {
@@ -157,7 +144,6 @@ export default {
       let res = await this.$axios
         .get("/home/getFeaturedSeries.json")
         .catch(err => err);
-      console.log(res, "feature");
       this.featured = res.data.featured;
     },
     viewFeature(value) {
@@ -182,14 +168,85 @@ export default {
           return err;
         });
       if (res.status === 200) {
-        console.log("response", res, arrayIds);
         this.$store.commit("SET_COMIC", res.data.chapters[0]);
         this.$store.commit("REMOVE_ID", arrayIds[0]);
-        console.log("response", res, arrayIds);
         return arrayIds.length > 0
           ? this.listFavorites()
+          : this.getCoverComic();
+      }
+    },
+    async getCoverComic() {
+      if (!this.comics.length) {
+        return (this.isLoading = false);
+      }
+      let comic = this.comicCloning;
+      let name = comic[0].name.replace(/\s/g, "-");
+      let response = await this.$axios
+        .get(`/api/manga/${name.toLowerCase()}/${comic[0].id_serie}`)
+        .catch(err => {
+          this.isLoading = false;
+          return err.response;
+        });
+      if (response.status === 200) {
+        let data = JSON.stringify(response.data);
+        let pathImg = this.searchHash(data);
+        this.$store.commit("IMG_COMIC", {
+          pathImg: pathImg,
+          id: comic[0].id_serie
+        });
+        comic.shift();
+        return comic.length > 0
+          ? this.getCoverComic()
           : (this.isLoading = false);
       }
+    },
+    searchHash(data) {
+      let search_01 = data.search("covers/");
+      let str = data.substr(search_01);
+      let search_02 = str.search("/external");
+      let search_condition = false;
+      if (search_02 > 50) {
+        search_condition = true;
+        search_02 = str.search("/capa");
+      }
+      let anotherResult = data.substr(search_01, search_02);
+      let hashLegacy = anotherResult.split("covers/")[1];
+      let extension = "";
+      search_condition
+        ? (extension = "/capa.jpg")
+        : (extension = "/external_cover.jpg");
+      return this.base_img + hashLegacy + extension;
+    },
+    getRelease(obj, chapter) {
+      let base = chapter.url;
+      let result_1 = base.substr(1);
+      let root_2 = result_1.search("/");
+      /* a barra nao conta na busca, retorna uma posiçao antes dela */
+      let result_2 = result_1.substr(root_2 + 1);
+      let root_3 = result_2.search("/");
+      let result_3 = result_2.substr(root_3 + 1);
+      let final_root = result_3.search("/");
+      let id_release = result_3.substr(result_3, final_root);
+      this.isLoading = true;
+      let header = this.$axios.get(`/api/${chapter.url}`).catch(err => {
+        this.isLoading = false;
+        return err;
+      });
+      header.then(res => {
+        let link = JSON.stringify(res.headers.link);
+        let initialSearch = link.search("&token=");
+        let result = link.substr(initialSearch);
+        let finalSearch = result.search("&id_release");
+        let resultHash = link.substr(initialSearch, finalSearch);
+        let hashRelease = resultHash.split("&token=")[1];
+        this.$store.commit("SET_HASH", hashRelease);
+        this.$store.commit("SET_RELEASE", id_release);
+        this.$store.commit("INFO_CHAPTER", {
+          name: obj.name,
+          number: chapter.number
+        });
+        this.$router.push("viewer");
+      });
     }
     // async testeSearch() {
     //   let formData = new FormData();
@@ -201,11 +258,18 @@ export default {
 };
 </script>
 <style>
-.back-cover {
-  height: 100%;
+.carousel-mobile {
   max-width: auto;
   /* Center and scale the image nicely */
   background-repeat: no-repeat;
   background-size: cover;
+  height: 200px;
+}
+.carousel {
+  max-width: auto;
+  /* Center and scale the image nicely */
+  background-repeat: no-repeat;
+  background-size: cover;
+  height: 100%;
 }
 </style>
