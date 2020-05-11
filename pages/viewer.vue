@@ -147,7 +147,7 @@ export default {
 </script>
 <style>
 .load-img {
-  width: 1200px;
+  width: 1000px;
   max-width: auto;
 }
 

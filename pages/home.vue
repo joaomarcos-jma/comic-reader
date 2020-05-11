@@ -39,7 +39,11 @@
                       <div>
                         <span class="font-weight-bold">{{item.name}}</span>
                       </div>
-                      <img style="height: 300px;width: 255px" :src="item.image" />
+                      <img
+                        @click="goToList(item)"
+                        style="height: 300px;width: 255px"
+                        :src="item.image"
+                      />
                     </v-col>
 
                     <v-container>
@@ -70,13 +74,18 @@
                 </v-list>
               </v-card>
             </v-col>
-            <v-col order="12">
+            <v-col order="1">
               <v-card class="pa-2" outlined tile>Second, but last</v-card>
             </v-col>
-            <v-col order="1">
+            <v-col order="12">
               <v-card class="pa-2" outlined tile>
-                <h3>Sugestoes de Leituras</h3>
-                <v-list three-line>
+                <h3>Recomendado</h3>
+                <v-subheader v-if="!comics || !comics.length">Sem Recomendações no Momento</v-subheader>
+                <v-list
+                  v-if="comics && comics.length > 0 || comics.image"
+                  :style="!isMobile ? 'text-align: center' : ''"
+                  three-line
+                >
                   <v-subheader>Enjoy</v-subheader>
                   <template v-for="(item, index) in comics">
                     <div :key="item.name">
@@ -85,11 +94,8 @@
 
                     <!-- <v-divider :key="index" inset></v-divider> -->
 
-                    <v-list-item :key="index">
-                      <img
-                        style="height: 300px;width: 255px"
-                        src="https://i1.wp.com/static3.leitor.net/covers/Nx18z6-pxIjlGM7Vwfjshw/7726/external_cover.jpg"
-                      />
+                    <v-list-item @click="goToList(item)" style="margin-bottom: 15px" :key="index">
+                      <img :class="isMobile ? 'favourites-mobile' : 'favourites'" :src="item.image" />
 
                       <v-list-item-content>
                         <v-list-item-title v-html="item.title"></v-list-item-title>
@@ -128,6 +134,11 @@ export default {
     this.getReleases();
     this.listFavorites();
   },
+  watch: {
+    comics(debug) {
+      console.log("comic atual", debug);
+    }
+  },
   computed: {
     comics() {
       return this.$store.state.comics;
@@ -140,6 +151,10 @@ export default {
     }
   },
   methods: {
+    goToList(item) {
+      this.$store.commit("LIST_COMIC", item);
+      this.$router.push("list");
+    },
     async getFeatured() {
       let res = await this.$axios
         .get("/home/getFeaturedSeries.json")
@@ -165,7 +180,7 @@ export default {
         .get(`/all/chapters_list.json?page=1&id_serie=${arrayIds[0]}`)
         .catch(err => {
           this.isLoading = false;
-          return err;
+          return err.response;
         });
       if (res.status === 200) {
         this.$store.commit("SET_COMIC", res.data.chapters[0]);
@@ -174,19 +189,28 @@ export default {
           ? this.listFavorites()
           : this.getCoverComic();
       }
+      res.status !== 200 ? this.getCoverComic() : "";
     },
     async getCoverComic() {
       if (!this.comics.length) {
+        console.log("parou aqui ?");
         return (this.isLoading = false);
       }
       let comic = this.comicCloning;
-      let name = comic[0].name.replace(/\s/g, "-");
+      console.log("o que temos no momento", comic);
+      let rgx = /\s/g;
+      let name = comic[0].name;
+      rgx.test(name) ? (name = comic[0].name.replace(rgx, "-")) : "";
+      let findLast = name.substr(name.length - 1);
+      findLast === "-" ? (name = name.slice(0, -1)) : "";
+
       let response = await this.$axios
         .get(`/api/manga/${name.toLowerCase()}/${comic[0].id_serie}`)
         .catch(err => {
           this.isLoading = false;
           return err.response;
         });
+      console.log("response", response);
       if (response.status === 200) {
         let data = JSON.stringify(response.data);
         let pathImg = this.searchHash(data);
@@ -271,5 +295,14 @@ export default {
   background-repeat: no-repeat;
   background-size: cover;
   height: 100%;
+}
+.favourites {
+  height: 280px;
+  width: 240px;
+  margin-left: 10%;
+}
+.favourites-mobile {
+  height: 280px;
+  width: 240px;
 }
 </style>

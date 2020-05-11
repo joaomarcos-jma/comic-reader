@@ -1,11 +1,12 @@
 export const state = () => ({
     id_release: '',
-    arrayIds: ["7702", "2412"],
+    arrayIds: ["7702", "2412", "7475"],
     comics: [],
     hash_release: '',
     infoChapter: {},
     imgComics: [],
-    isMobile: null
+    isMobile: null,
+    infoComic: {}
 })
 
 export const mutations = {
@@ -22,7 +23,7 @@ export const mutations = {
                 indexId = index
             }
         })
-        state.comics[indexId].img = value
+        state.comics[indexId].image = value.pathImg
     },
     REMOVE_ID(state, id) {
         let indexId = null;
@@ -41,6 +42,13 @@ export const mutations = {
     },
     SET_MOBILE(state, value) {
         state.isMobile = value
+    },
+    LIST_COMIC(state, comic) {
+        state.infoComic = {
+            name: comic.name,
+            id_serie: comic.id_serie,
+            image: comic.image
+        }
     }
 }
 

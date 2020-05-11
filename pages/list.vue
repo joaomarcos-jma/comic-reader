@@ -5,22 +5,31 @@
     </v-overlay>
     <v-container>
       <v-card
-        v-show="allChapters.length > 0"
+        v-show="allChapters && allChapters.length > 0"
         max-width="1200"
         class="mx-auto"
         style="margin-top: -90px"
       >
         <v-card-text>
           <v-list two-line subheader>
-            <span style="font-size: 14pt;color: color: rgba(255, 255, 255, 0.7);" inset>{{title}}</span>
+            <span
+              style="font-size: 14pt;color: color: rgba(255, 255, 255, 0.7);"
+              inset
+            >{{infoComic.name}}</span>
 
-            <v-list-item v-for="(item, i) in allChapters" @click="getRelease(item.releases, {name: item.name, number: item.number})" :key="i">
+            <v-list-item
+              v-for="(item, i) in allChapters"
+              @click="getRelease(item.releases, {name: item.name, number: item.number})"
+              :key="i"
+            >
               <v-list-item-avatar size="80">
-                <v-img :src="require('../static/logos/tdg.png')"></v-img>
+                <v-img :src="infoComic.image"></v-img>
               </v-list-item-avatar>
 
               <v-list-item-content>
-                <span :style="isMobile ? 'font-size: 13pt' : 'font-size: 16pt'">{{'Capítulo ' + item.number}}</span>
+                <span
+                  :style="isMobile ? 'font-size: 13pt' : 'font-size: 16pt'"
+                >{{'Capítulo ' + item.number}}</span>
                 <span class="hint-text">{{'Disponível em: ' + $mask.dateFormat(item.date_created)}}</span>
               </v-list-item-content>
 
@@ -73,6 +82,7 @@ export default {
   }),
   mounted() {
     this.isLoading = true;
+    console.log("infoComic", this.infoComic);
     setTimeout(() => {
       this.getAllChapters();
     }, 1500);
@@ -80,18 +90,32 @@ export default {
   watch: {
     page(index) {
       this.getAllChapters(index);
+    },
+    infoComic(comic) {
+      console.log("bora?", comic);
+    }
+  },
+  computed: {
+    infoComic() {
+      return this.$store.state.infoComic;
+    },
+    isMobile() {
+      return this.$store.state.isMobile;
     }
   },
   methods: {
     async getAllChapters(page = 1) {
       let response = await this.$axios
-        .get(`/all/chapters_list.json?page=${page}&id_serie=${this.id_serie}`)
+        .get(
+          `/all/chapters_list.json?page=${page}&id_serie=${this.infoComic.id_serie}`
+        )
         .catch(err => {
           this.isLoading = false;
           console.error(err.response);
-          return err;
+          return err.response;
         });
       console.log("response", response);
+      response.status !== 200 ? this.$router.push("home") : "";
       if (response.data) {
         this.allChapters = response.data.chapters;
         this.title = this.allChapters.find(res => res).name;
