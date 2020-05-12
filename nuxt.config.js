@@ -31,6 +31,7 @@ export default {
   */
   plugins: [
     '~/plugins/mask.js',
+    '~/plugins/method.js',
   ],
   /*
   ** Nuxt.js dev-modules
@@ -49,7 +50,6 @@ export default {
     proxy: true
   },
   proxy: {
-
     '/api/': { target: "https://leitor.net", pathRewrite: { '^/api/': '' }, changeOrigin: true },
     '/scan/': { target: "https://leitor.net/leitor/pages/", pathRewrite: { '^/scan/': '' }, changeOrigin: true },
     '/all/': { target: "https://leitor.net/series/", pathRewrite: { '^/all/': '' }, changeOrigin: true },

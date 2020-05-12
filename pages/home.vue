@@ -1,9 +1,9 @@
 <template>
   <v-content>
-    <v-overlay class="fill-height" :value="isLoading">
-      <loading v-if="isLoading" />
+    <v-overlay class="fill-height" :value="isLoading || !stateLoading">
+      <loading v-if="isLoading || !stateLoading" />
     </v-overlay>
-    <v-layout v-show="!isLoading">
+    <v-layout v-show="!isLoading && releases.length">
       <v-flex>
         <v-carousel
           style="margin-top: -100px"
@@ -12,10 +12,15 @@
           hide-delimiter-background
           show-arrows-on-hover
         >
-          <v-carousel-item v-for="(slide, i) of featured" :key="i">
-            <div style="text-align: center" :class="isMobile ? 'carousel-mobile' : 'carousel'">
-              <v-img v-show="isMobile" @click="viewFeature(slide)" :src="slide.featured_image"></v-img>
-              <img v-show="!isMobile" @click="viewFeature(slide)" :src="slide.featured_image" />
+          <v-carousel-item v-for="(release, i) of featured" :key="i">
+            <span class="font-weight-bold">Capítulo {{release.chapter.number}}</span>
+            <div
+              @click="goToList(release)"
+              style="text-align: center"
+              :class="isMobile ? 'carousel-mobile' : 'carousel'"
+            >
+              <v-img v-show="isMobile" :src="release.featured_image"></v-img>
+              <img v-show="!isMobile" :src="release.featured_image" />
             </div>
             <!-- <v-row class="fill-height" align="center" justify="center">
             </v-row>-->
@@ -36,8 +41,8 @@
                     :key="i"
                   >
                     <v-col sm="5" md="8">
-                      <div>
-                        <span class="font-weight-bold">{{item.name}}</span>
+                      <div style="width: 255px">
+                        <span class="font-weight-bold">{{$method.trimString(item.name, 60)}}</span>
                       </div>
                       <img
                         @click="goToList(item)"
@@ -52,9 +57,8 @@
                         v-for="(cap, i) in item.chapters"
                         :key="i"
                       >
-                        <!-- <span v-if="i < 3">{{i + 1 + "Eu"}}</span> -->
                         <v-btn
-                          @click="getRelease(item, cap)"
+                          @click="showRelease(item, cap)"
                           style="margin-bottom: 5px"
                           v-if="i < 6"
                         >
@@ -62,14 +66,6 @@
                         </v-btn>
                       </div>
                     </v-container>
-                    <!-- <v-col sm="5" offset-sm="2" md="4" offset-md="0">
-                     
-                    </v-col>-->
-                    <!-- <div v-for="(cap, i) in item.chapters" :key="i">
-                          <div class="text-center">
-                            <v-btn v-if="i < 2">{{cap.number}}</v-btn>
-                          </div>
-                    </div>-->
                   </v-row>
                 </v-list>
               </v-card>
@@ -88,13 +84,18 @@
                 >
                   <v-subheader>Enjoy</v-subheader>
                   <template v-for="(item, index) in comics">
-                    <div :key="item.name">
+                    <div v-if="item.image" :key="item.name">
                       <span class="font-weight-bold">{{item.name}}</span>
                     </div>
 
                     <!-- <v-divider :key="index" inset></v-divider> -->
 
-                    <v-list-item @click="goToList(item)" style="margin-bottom: 15px" :key="index">
+                    <v-list-item
+                      v-if="item.image"
+                      @click="goToList(item)"
+                      style="margin-bottom: 15px"
+                      :key="index"
+                    >
                       <img :class="isMobile ? 'favourites-mobile' : 'favourites'" :src="item.image" />
 
                       <v-list-item-content>
@@ -137,6 +138,9 @@ export default {
   watch: {
     comics(debug) {
       console.log("comic atual", debug);
+    },
+    stateLoading(load) {
+      this.$router.push("viewer");
     }
   },
   computed: {
@@ -148,6 +152,9 @@ export default {
     },
     comicCloning() {
       return cloneDeep(this.$store.state.comics);
+    },
+    stateLoading() {
+      return this.$store.state.stateLoading;
     }
   },
   methods: {
@@ -161,14 +168,16 @@ export default {
         .catch(err => err);
       this.featured = res.data.featured;
     },
-    viewFeature(value) {
-      console.log(value, "here");
-    },
     async getReleases(page = 1) {
+      this.isLoading = true;
       let res = await this.$axios
         .get(`/home/releases?page=${page}`)
-        .catch(err => err);
-      this.releases = res.data.releases;
+        .catch(err => err.response);
+      if (res.status === 200) {
+        this.releases = res.data.releases;
+        this.isLoading = false;
+      }
+      this.isLoading = false;
     },
     async listFavorites() {
       let arrayIds = this.$store.state.arrayIds;
@@ -189,28 +198,25 @@ export default {
           ? this.listFavorites()
           : this.getCoverComic();
       }
-      res.status !== 200 ? this.getCoverComic() : "";
+      this.getCoverComic();
     },
     async getCoverComic() {
       if (!this.comics.length) {
-        console.log("parou aqui ?");
         return (this.isLoading = false);
       }
       let comic = this.comicCloning;
-      console.log("o que temos no momento", comic);
       let rgx = /\s/g;
       let name = comic[0].name;
       rgx.test(name) ? (name = comic[0].name.replace(rgx, "-")) : "";
       let findLast = name.substr(name.length - 1);
       findLast === "-" ? (name = name.slice(0, -1)) : "";
-
+      name = name.replace(/[(]/g, "").replace(/[)]/g, "");
       let response = await this.$axios
         .get(`/api/manga/${name.toLowerCase()}/${comic[0].id_serie}`)
         .catch(err => {
           this.isLoading = false;
           return err.response;
         });
-      console.log("response", response);
       if (response.status === 200) {
         let data = JSON.stringify(response.data);
         let pathImg = this.searchHash(data);
@@ -241,36 +247,8 @@ export default {
         : (extension = "/external_cover.jpg");
       return this.base_img + hashLegacy + extension;
     },
-    getRelease(obj, chapter) {
-      let base = chapter.url;
-      let result_1 = base.substr(1);
-      let root_2 = result_1.search("/");
-      /* a barra nao conta na busca, retorna uma posiçao antes dela */
-      let result_2 = result_1.substr(root_2 + 1);
-      let root_3 = result_2.search("/");
-      let result_3 = result_2.substr(root_3 + 1);
-      let final_root = result_3.search("/");
-      let id_release = result_3.substr(result_3, final_root);
-      this.isLoading = true;
-      let header = this.$axios.get(`/api/${chapter.url}`).catch(err => {
-        this.isLoading = false;
-        return err;
-      });
-      header.then(res => {
-        let link = JSON.stringify(res.headers.link);
-        let initialSearch = link.search("&token=");
-        let result = link.substr(initialSearch);
-        let finalSearch = result.search("&id_release");
-        let resultHash = link.substr(initialSearch, finalSearch);
-        let hashRelease = resultHash.split("&token=")[1];
-        this.$store.commit("SET_HASH", hashRelease);
-        this.$store.commit("SET_RELEASE", id_release);
-        this.$store.commit("INFO_CHAPTER", {
-          name: obj.name,
-          number: chapter.number
-        });
-        this.$router.push("viewer");
-      });
+    showRelease(obj, chapter) {
+      this.$store.dispatch("showRelease", { obj: obj, chapter: chapter });
     }
     // async testeSearch() {
     //   let formData = new FormData();

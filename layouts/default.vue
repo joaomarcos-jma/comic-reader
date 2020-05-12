@@ -93,14 +93,12 @@ export default {
   },
   watch: {
     infoComic(value) {
-      console.log("changes", value);
       value ? this.checkItemsTab() : "";
     }
   },
   methods: {
     checkItemsTab() {
       if (this.infoComic && this.infoComic.id_serie) {
-        console.log("me diz", this.infoComic, "test", this.items);
         let routeList = this.items.find(res => res.id === 2);
         return !routeList
           ? this.items.push({
@@ -112,10 +110,8 @@ export default {
       }
       let index;
       this.items.map((res, i) => {
-        console.log("tem key", i);
         return res.id === 2 ? (index = i) : "";
       });
-      console.log("index", index);
       index ? this.items.splice(index, 1) : "";
     },
     onResize() {

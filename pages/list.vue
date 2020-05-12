@@ -1,7 +1,7 @@
 <template>
   <v-content>
-    <v-overlay class="fill-height" :value="isLoading">
-      <loading v-if="isLoading" />
+    <v-overlay class="fill-height" :value="isLoading || !stateLoading">
+      <loading v-if="isLoading || !stateLoading" />
     </v-overlay>
     <v-container>
       <v-card
@@ -82,7 +82,6 @@ export default {
   }),
   mounted() {
     this.isLoading = true;
-    console.log("infoComic", this.infoComic);
     setTimeout(() => {
       this.getAllChapters();
     }, 1500);
@@ -91,8 +90,8 @@ export default {
     page(index) {
       this.getAllChapters(index);
     },
-    infoComic(comic) {
-      console.log("bora?", comic);
+    stateLoading(load) {
+      this.$router.push("viewer");
     }
   },
   computed: {
@@ -101,6 +100,9 @@ export default {
     },
     isMobile() {
       return this.$store.state.isMobile;
+    },
+    stateLoading() {
+      return this.$store.state.stateLoading;
     }
   },
   methods: {
@@ -111,10 +113,8 @@ export default {
         )
         .catch(err => {
           this.isLoading = false;
-          console.error(err.response);
           return err.response;
         });
-      console.log("response", response);
       response.status !== 200 ? this.$router.push("home") : "";
       if (response.data) {
         this.allChapters = response.data.chapters;
@@ -124,23 +124,10 @@ export default {
     },
     getRelease(obj, infoChapter) {
       let release = Object.entries(obj).find(res => res)[1];
-      console.log("1 link", release, "infoChapter", infoChapter);
-      this.isLoading = true;
-      let header = this.$axios.get(`/api/${release.link}`).catch(err => {
-        this.isLoading = false;
-        return err;
-      });
-      header.then(res => {
-        let link = JSON.stringify(res.headers.link);
-        let initialSearch = link.search("&token=");
-        let result = link.substr(initialSearch);
-        let finalSearch = result.search("&id_release");
-        let resultHash = link.substr(initialSearch, finalSearch);
-        let hashRelease = resultHash.split("&token=")[1];
-        this.$store.commit("SET_HASH", hashRelease);
-        this.$store.commit("SET_RELEASE", release.id_release);
-        this.$store.commit("INFO_CHAPTER", infoChapter);
-        this.$router.push("viewer");
+      this.$store.dispatch("showRelease", {
+        obj: obj,
+        chapter: infoChapter,
+        link: release.link
       });
     }
   }

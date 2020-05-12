@@ -11,7 +11,11 @@
       </v-flex>
     </v-layout>
 
-    <v-footer color="#121212" v-show="render" :class="isMobile ? 'load-img' : 'text-center'">
+    <v-footer
+      color="#121212"
+      v-show="render && loadFiles.length > 0"
+      :class="isMobile ? 'load-img' : 'text-center'"
+    >
       <v-card class="flex" flat tile>
         <v-card-text>
           <v-list class="teal white--text text-center">
@@ -20,12 +24,11 @@
                 <div style="text-align: left;margin-left: 30px">
                   <v-btn @click="goBack()" text style="margin-right: 30px" dark>
                     <v-icon>fas fa-arrow-left</v-icon>
-                    <span style="font-size: 14pt">Voltar</span>
                   </v-btn>
                 </div>
               </v-list-item-content>
 
-              <v-spacer></v-spacer>
+              <!-- <v-spacer></v-spacer> -->
 
               <v-list-item-icon style="margin-right: 5px" @click="teste('anterior')">
                 <v-btn outlined>
@@ -42,11 +45,10 @@
                   <v-icon>fas fa-step-forward</v-icon>
                 </v-btn>
               </v-list-item-icon>
-              <v-spacer></v-spacer>
               <strong
                 style="font-size: 14pt"
                 class="subheading"
-              >{{infoChapter.name + ' - Capítulo ' + infoChapter.number}}</strong>
+              >{{$method.trimString(infoChapter.name, 25) + ' - Capítulo ' + infoChapter.number}}</strong>
             </v-list-item>
           </v-list>
         </v-card-text>
@@ -88,9 +90,10 @@ export default {
   mounted() {
     this.isLoading = true;
     this.render = false;
-    if (this.hashRelease) {
+    this.images.pop();
+    setTimeout(() => {
       this.getScan();
-    }
+    }, 1500);
   },
   watch: {
     loadFiles(value) {
@@ -109,7 +112,6 @@ export default {
           this.isLoading = false;
           return err;
         });
-      console.log("response", res);
       if (res.data) {
         this.images = res.data.images;
         this.isLoading = false;
@@ -127,7 +129,6 @@ export default {
   },
   computed: {
     loadFiles() {
-      console.log("here", this.images);
       return this.images;
     },
     release() {
