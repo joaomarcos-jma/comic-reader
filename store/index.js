@@ -8,7 +8,8 @@ export const state = () => ({
     isMobile: null,
     infoComic: {},
     stateLoading: true,
-    images: []
+    listCurrent: {},
+    chaptersList: {}
 })
 
 export const mutations = {
@@ -55,22 +56,19 @@ export const mutations = {
     SET_LOADING(state, value) {
         state.stateLoading = value
     },
-    LOAD_IMGS(state, value) {
-        state.images.push(value)
+    ALL_LIST(state, value) {
+        state.listCurrent = value
     },
-    CLEAR_IMGS(state) {
-        while (state.images.length > 0) {
-            state.images.pop();
-        }
+    CHAPTERS_LIST(state, value) {
+        state.chaptersList = value
     }
 }
 
 export const actions = {
     async showRelease({ commit }, payload) {
-        commit("CLEAR_IMGS")
         let chapter = payload.chapter;
-        let obj = payload.obj;
-        console.log("payload", payload)
+        let obj;
+        payload.obj ? obj = payload.obj : ''
         payload.link ? chapter['url'] = payload.link : ''
         let base = chapter.url;
         let result_1 = base.substr(1);
@@ -95,14 +93,11 @@ export const actions = {
         let finalSearch = result.search("&id_release");
         let resultHash = link.substr(initialSearch, finalSearch);
         let hashRelease = resultHash.split("&token=")[1];
-        console.log("hashRelease", hashRelease)
-        console.log("id_release", id_release)
         commit("SET_HASH", hashRelease);
         commit("SET_RELEASE", id_release);
         commit("SET_LOADING", true)
-        console.log("obj.name", obj.name, "payload", payload)
         commit("INFO_CHAPTER", {
-            name: obj.name || chapter.name,
+            name: obj ? obj.name : chapter.name,
             number: chapter.number
         });
     }

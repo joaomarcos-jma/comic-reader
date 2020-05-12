@@ -4,7 +4,10 @@
       <v-overlay class="fill-height" :value="isLoading">
         <loading v-if="isLoading" />
       </v-overlay>
-      <v-flex v-show="loadFiles.length > 0" :class="!isMobile ? 'load-img' : 'load-img-mobile'">
+      <v-flex
+        v-show="loadFiles.length > 0 && !isLoading"
+        :class="!isMobile ? 'load-img' : 'load-img-mobile'"
+      >
         <div v-for="(src, i) in loadFiles" :src="src" :key="i" class="images" v-viewer>
           <img class="load-img" :src="src" />
         </div>
@@ -13,7 +16,7 @@
 
     <v-footer
       color="#121212"
-      v-show="render && loadFiles.length > 0"
+      v-show="render && loadFiles.length > 0 && !isLoading"
       :class="isMobile ? 'load-img' : 'text-center'"
     >
       <v-card class="flex" flat tile>
@@ -30,13 +33,13 @@
 
               <!-- <v-spacer></v-spacer> -->
 
-              <v-list-item-icon style="margin-right: 5px" @click="teste('anterior')">
+              <v-list-item-icon style="margin-right: 5px" @click="stateArray('prev')">
                 <v-btn outlined>
                   <v-icon>fas fa-step-backward</v-icon>Anterior
                 </v-btn>
               </v-list-item-icon>
               <v-list-item-icon
-                @click="teste('proximo')"
+                @click="stateArray('next')"
                 class="ml-0"
                 :class="{ 'mr-3': $vuetify.breakpoint.mdAndUp }"
               >
@@ -76,6 +79,7 @@
 import "viewerjs/dist/viewer.css";
 import Viewer from "v-viewer";
 import Loading from "../components/Loading";
+import cloneDeep from "lodash/cloneDeep";
 import Vue from "vue";
 Vue.use(Viewer);
 export default {
@@ -92,16 +96,18 @@ export default {
     this.render = false;
     this.images.pop();
     setTimeout(() => {
-      this.getScan();
-    }, 1500);
+      this.render = true;
+    }, 800);
   },
   watch: {
-    loadFiles(value) {
-      return value
-        ? setTimeout(() => {
-            this.render = true;
-          }, 300)
-        : "";
+    hashRelease(value) {
+      console.log("detect changes hash", value);
+      if (value) {
+        this.getScan();
+        setTimeout(() => {
+          this.render = true;
+        }, 800);
+      }
     }
   },
   methods: {
@@ -123,8 +129,40 @@ export default {
         ? this.$router.go(-1)
         : this.$router.push("home");
     },
-    teste(value) {
-      console.log(value);
+    stateArray(action) {
+      this.isLoading = true;
+      this.render = false;
+      let infoChapter;
+      ["next"].includes(action)
+        ? (infoChapter = this.next)
+        : (infoChapter = this.prev);
+
+      this.$store.dispatch("showRelease", {
+        chapter: infoChapter.chapter,
+        link: infoChapter.link
+      });
+      const next = this.$method.arrayState(
+        this.listCurrent,
+        infoChapter.indexChapter
+      );
+      const previous = cloneDeep(next);
+      /* logica invertida devido ao orderBy, mantendo a funcao arrayState na forma correta para uso futuro*/
+      let nextChapter = next.prev();
+      let prevChapter = previous.next();
+      let chaptersList = {
+        current: infoChapter,
+        prev: {
+          chapter: prevChapter.obj,
+          link: this.$method.releaseTransform(prevChapter.obj.releases).link,
+          indexChapter: prevChapter.index
+        },
+        next: {
+          chapter: nextChapter.obj,
+          link: this.$method.releaseTransform(nextChapter.obj.releases).link,
+          indexChapter: nextChapter.index
+        }
+      };
+      this.$store.commit("CHAPTERS_LIST", chaptersList);
     }
   },
   computed: {
@@ -142,6 +180,15 @@ export default {
     },
     isMobile() {
       return this.$store.state.isMobile;
+    },
+    next() {
+      return this.$store.state.chaptersList.next;
+    },
+    prev() {
+      return this.$store.state.chaptersList.prev;
+    },
+    listCurrent() {
+      return this.$store.state.listCurrent.all;
     }
   }
 };

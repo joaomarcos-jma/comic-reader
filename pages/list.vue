@@ -19,7 +19,7 @@
 
             <v-list-item
               v-for="(item, i) in allChapters"
-              @click="getRelease(item.releases, {name: item.name, number: item.number})"
+              @click="getRelease(item.releases, {name: item.name, number: item.number, index: i})"
               :key="i"
             >
               <v-list-item-avatar size="80">
@@ -50,6 +50,7 @@
 
 <script>
 import Loading from "../components/Loading";
+import cloneDeep from "lodash/cloneDeep";
 
 export default {
   components: { Loading },
@@ -118,17 +119,46 @@ export default {
       response.status !== 200 ? this.$router.push("home") : "";
       if (response.data) {
         this.allChapters = response.data.chapters;
+        let listCurrent = {
+          page: page,
+          all: this.allChapters
+        };
+        console.log("ALL_LIST", listCurrent);
+        this.$store.commit("ALL_LIST", listCurrent);
         this.title = this.allChapters.find(res => res).name;
         this.isLoading = false;
       }
     },
     getRelease(obj, infoChapter) {
+      console.log("position obj", infoChapter);
+      this.stateArray(infoChapter);
       let release = Object.entries(obj).find(res => res)[1];
       this.$store.dispatch("showRelease", {
-        obj: obj,
+        // obj: obj,
         chapter: infoChapter,
         link: release.link
       });
+    },
+    stateArray(infoChapter) {
+      const next = this.$method.arrayState(this.allChapters, infoChapter.index);
+      const previous = cloneDeep(next);
+      /* logica invertida devido ao orderBy, mantendo a funcao arrayState na forma correta para uso futuro*/
+      let nextChapter = next.prev();
+      let prevChapter = previous.next();
+      let chaptersList = {
+        current: infoChapter,
+        prev: {
+          chapter: prevChapter.obj,
+          link: this.$method.releaseTransform(prevChapter.obj.releases).link,
+          indexChapter: prevChapter.index
+        },
+        next: {
+          chapter: nextChapter.obj,
+          link: this.$method.releaseTransform(nextChapter.obj.releases).link,
+          indexChapter: nextChapter.index
+        }
+      };
+      this.$store.commit("CHAPTERS_LIST", chaptersList);
     }
   }
 };
