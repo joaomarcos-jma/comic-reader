@@ -1,3 +1,6 @@
+
+import cloneDeep from "lodash/cloneDeep";
+
 export const state = () => ({
     id_release: '',
     arrayIds: ["7702", "2412", "7475", "3364", "1772"],
@@ -67,9 +70,7 @@ export const mutations = {
 export const actions = {
     async showRelease({ commit }, payload) {
         let chapter = payload.chapter;
-        let obj;
-        payload.obj ? obj = payload.obj : ''
-        payload.link ? chapter['url'] = payload.link : ''
+        payload.link ? chapter['url'] = payload.link : chapter['url'] = chapter.url
         let base = chapter.url;
         let result_1 = base.substr(1);
         let root_2 = result_1.search("/");
@@ -85,6 +86,7 @@ export const actions = {
             return err.response;
         });
         if (response.status !== 200) {
+            console.log('here error ===danger=== ')
             return;
         }
         let link = JSON.stringify(response.headers.link);
@@ -97,8 +99,60 @@ export const actions = {
         commit("SET_RELEASE", id_release);
         commit("SET_LOADING", true)
         commit("INFO_CHAPTER", {
-            name: obj ? obj.name : chapter.name,
+            name: payload.obj ? payload.obj.name : chapter.name,
             number: chapter.number
+        });
+    },
+    async getAllChapters({ state, dispatch, commit }, payload) {
+        let page = state.listCurrent.page;
+        payload.indexChapter === 0 ? page-- : page++
+        commit("SET_LOADING", false)
+        let response = await this.$axios
+            .get(
+                `/all/chapters_list.json?page=${page}&id_serie=${payload.chapter.id_serie}`
+            )
+            .catch(err => {
+                commit("SET_LOADING", true)
+                return err.response;
+            });
+        if (response.status === 200) {
+            commit("SET_LOADING", true)
+            commit("ALL_LIST", {
+                page: page,
+                all: response.data.chapters
+            });
+            dispatch('stateArray', { infoChapter: payload, all: response.data.chapters })
+        }
+    },
+    stateArray({ commit, dispatch }, payload) {
+        let index;
+        payload.infoChapter.indexChapter === 0 ? index = 29 : index = 0
+        const next = this.$method.arrayState(
+            payload.all,
+            index
+        );
+        const previous = cloneDeep(next);
+        /* logica invertida devido ao orderBy, mantendo a funcao arrayState na forma correta para uso futuro*/
+        let nextChapter = next.prev();
+        let prevChapter = previous.next();
+
+        let chaptersList = {
+            current: payload.infoChapter,
+            prev: {
+                chapter: prevChapter.obj,
+                link: this.$method.releaseTransform(prevChapter.obj.releases).link,
+                indexChapter: prevChapter.index
+            },
+            next: {
+                chapter: nextChapter.obj,
+                link: this.$method.releaseTransform(nextChapter.obj.releases).link,
+                indexChapter: nextChapter.index
+            }
+        };
+        commit("CHAPTERS_LIST", chaptersList);
+        dispatch("showRelease", {
+            chapter: index === 0 ? chaptersList.next.chapter : chaptersList.prev.chapter,
+            link: index === 0 ? chaptersList.next.link : chaptersList.prev.link
         });
     }
 }

@@ -1,8 +1,8 @@
 <template>
   <v-content style="margin-top: -10px">
     <v-layout class="text-center">
-      <v-overlay class="fill-height" :value="isLoading">
-        <loading v-if="isLoading" />
+      <v-overlay class="fill-height" :value="isLoading || !stateLoading">
+        <loading v-if="isLoading || !stateLoading" />
       </v-overlay>
       <v-flex
         v-show="loadFiles.length > 0 && !isLoading"
@@ -33,13 +33,18 @@
 
               <!-- <v-spacer></v-spacer> -->
 
-              <v-list-item-icon style="margin-right: 5px" @click="stateArray('prev')">
+              <v-list-item-icon
+                v-if="visiblePrev"
+                style="margin-right: 5px"
+                @click="stateArray('prev')"
+              >
                 <v-btn outlined>
                   <v-icon>fas fa-step-backward</v-icon>Anterior
                 </v-btn>
               </v-list-item-icon>
               <v-list-item-icon
                 @click="stateArray('next')"
+                v-if="visibleNext"
                 class="ml-0"
                 :class="{ 'mr-3': $vuetify.breakpoint.mdAndUp }"
               >
@@ -48,10 +53,11 @@
                   <v-icon>fas fa-step-forward</v-icon>
                 </v-btn>
               </v-list-item-icon>
+              <v-spacer></v-spacer>
               <strong
                 style="font-size: 14pt"
                 class="subheading"
-              >{{$method.trimString(infoChapter.name, 25) + ' - Capítulo ' + infoChapter.number}}</strong>
+              >{{$method.trimString(currentChapter.name, 25) + ' - Capítulo ' + currentChapter.number}}</strong>
             </v-list-item>
           </v-list>
         </v-card-text>
@@ -83,30 +89,40 @@ import cloneDeep from "lodash/cloneDeep";
 import Vue from "vue";
 Vue.use(Viewer);
 export default {
+  scrollToTop: true,
   components: { Loading },
   data: () => ({
     images: [],
     isLoading: false,
     render: false,
+    visiblePrev: true,
+    visibleNext: true,
     icons: ["mdi-github"],
     linkOwner: "https://github.com/joaomarcos-jma"
   }),
   mounted() {
     this.isLoading = true;
     this.render = false;
-    this.images.pop();
-    setTimeout(() => {
-      this.render = true;
-    }, 800);
   },
   watch: {
     hashRelease(value) {
-      console.log("detect changes hash", value);
-      if (value) {
-        this.getScan();
-        setTimeout(() => {
-          this.render = true;
-        }, 800);
+      this.visiblePrev = true;
+      this.visibleNext = true;
+      this.getScan();
+      setTimeout(() => {
+        this.render = true;
+      }, 1000);
+      if (
+        [this.prev.chapter.number].includes(this.currentChapter.number) &&
+        ["0", "1"].includes(this.currentChapter.number)
+      ) {
+        this.visiblePrev = false;
+      }
+      if (
+        [1].includes(this.listCurrent.page) &&
+        [this.next.chapter.number].includes(this.currentChapter.number)
+      ) {
+        this.visibleNext = false;
       }
     }
   },
@@ -116,13 +132,13 @@ export default {
         .get(`/scan/${this.release}.json?key=${this.hashRelease}`)
         .catch(err => {
           this.isLoading = false;
-          return err;
+          return err.response;
         });
-      if (res.data) {
-        this.images = res.data.images;
-        this.isLoading = false;
+      if (res.status !== 200) {
+        return this.goBack();
       }
-      return res;
+      this.images = res.data.images;
+      this.isLoading = false;
     },
     goBack() {
       window.history.length > 1
@@ -130,38 +146,64 @@ export default {
         : this.$router.push("home");
     },
     stateArray(action) {
-      this.isLoading = true;
-      this.render = false;
       let infoChapter;
       ["next"].includes(action)
         ? (infoChapter = this.next)
         : (infoChapter = this.prev);
-
+      this.isLoading = true;
+      this.render = false;
       this.$store.dispatch("showRelease", {
         chapter: infoChapter.chapter,
         link: infoChapter.link
       });
+      let chaptersList = {
+        current: infoChapter
+      };
+      if (
+        [0].includes(infoChapter.indexChapter) &&
+        this.listCurrent.page === 1
+      ) {
+        this.chaptersList.current.chapter
+          ? (chaptersList["prev"] = this.chaptersList.current)
+          : (chaptersList["prev"] = {
+              chapter: this.chaptersList.current,
+              link: this.chaptersList.current.url,
+              indexChapter: this.chaptersList.current.index
+            });
+        chaptersList["next"] = this.chaptersList.next;
+        this.$store.commit("CHAPTERS_LIST", chaptersList);
+        return;
+      }
+      if (
+        ([0].includes(infoChapter.indexChapter) &&
+          [1].includes(this.prev.indexChapter)) ||
+        (["prev"].includes(action) &&
+          this.next &&
+          [28].includes(this.next.indexChapter) &&
+          [29].includes(this.prev.indexChapter))
+      ) {
+        this.$store.dispatch("getAllChapters", infoChapter);
+        return;
+      }
       const next = this.$method.arrayState(
-        this.listCurrent,
+        this.listCurrent.all,
         infoChapter.indexChapter
       );
       const previous = cloneDeep(next);
       /* logica invertida devido ao orderBy, mantendo a funcao arrayState na forma correta para uso futuro*/
       let nextChapter = next.prev();
       let prevChapter = previous.next();
-      let chaptersList = {
-        current: infoChapter,
-        prev: {
-          chapter: prevChapter.obj,
-          link: this.$method.releaseTransform(prevChapter.obj.releases).link,
-          indexChapter: prevChapter.index
-        },
-        next: {
+
+      (chaptersList["prev"] = {
+        chapter: prevChapter.obj,
+        link: this.$method.releaseTransform(prevChapter.obj.releases).link,
+        indexChapter: prevChapter.index
+      }),
+        (chaptersList["next"] = {
           chapter: nextChapter.obj,
           link: this.$method.releaseTransform(nextChapter.obj.releases).link,
           indexChapter: nextChapter.index
-        }
-      };
+        });
       this.$store.commit("CHAPTERS_LIST", chaptersList);
     }
   },
@@ -175,8 +217,11 @@ export default {
     hashRelease() {
       return this.$store.state.hash_release;
     },
-    infoChapter() {
+    currentChapter() {
       return this.$store.state.infoChapter;
+    },
+    chaptersList() {
+      return this.$store.state.chaptersList;
     },
     isMobile() {
       return this.$store.state.isMobile;
@@ -188,14 +233,17 @@ export default {
       return this.$store.state.chaptersList.prev;
     },
     listCurrent() {
-      return this.$store.state.listCurrent.all;
+      return this.$store.state.listCurrent;
+    },
+    stateLoading() {
+      return this.$store.state.stateLoading;
     }
   }
 };
 </script>
 <style>
 .load-img {
-  width: 1000px;
+  width: 800px;
   max-width: auto;
 }
 

@@ -130,10 +130,10 @@ export default {
     };
   },
   mounted() {
-    // this.isLoading = true;
+    this.isLoading = true;
+    this.listFavorites();
     this.getFeatured();
     this.getReleases();
-    this.listFavorites();
   },
   watch: {
     comics(debug) {

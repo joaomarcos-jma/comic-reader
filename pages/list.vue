@@ -3,13 +3,8 @@
     <v-overlay class="fill-height" :value="isLoading || !stateLoading">
       <loading v-if="isLoading || !stateLoading" />
     </v-overlay>
-    <v-container>
-      <v-card
-        v-show="allChapters && allChapters.length > 0"
-        max-width="1200"
-        class="mx-auto"
-        style="margin-top: -90px"
-      >
+    <v-container v-show="allChapters && allChapters.length > 0">
+      <v-card max-width="1200" class="mx-auto" style="margin-top: -90px">
         <v-card-text>
           <v-list two-line subheader>
             <span
@@ -44,6 +39,14 @@
           </v-list>
         </v-card-text>
       </v-card>
+      <div class="text-center">
+        <v-pagination
+          v-model="page"
+          :length="!endAll ? page + 1 : page "
+          prev-icon="mdi-menu-left"
+          next-icon="mdi-menu-right"
+        ></v-pagination>
+      </div>
     </v-container>
   </v-content>
 </template>
@@ -53,6 +56,7 @@ import Loading from "../components/Loading";
 import cloneDeep from "lodash/cloneDeep";
 
 export default {
+  scrollToTop: true,
   components: { Loading },
   data: () => ({
     id_serie: "2412",
@@ -60,6 +64,7 @@ export default {
     isLoading: false,
     allChapters: [],
     title: "",
+    endAll: false,
     items: [
       {
         icon: "folder",
@@ -89,10 +94,19 @@ export default {
   },
   watch: {
     page(index) {
+      this.isLoading = true;
       this.getAllChapters(index);
     },
     stateLoading(load) {
       this.$router.push("viewer");
+    },
+    allChapters(chapter) {
+      this.endAll = false;
+      chapter.forEach(res => {
+        if (['0', '1'].includes(res.number)) {
+          this.endAll = true;
+        }
+      });
     }
   },
   computed: {
@@ -123,18 +137,15 @@ export default {
           page: page,
           all: this.allChapters
         };
-        console.log("ALL_LIST", listCurrent);
         this.$store.commit("ALL_LIST", listCurrent);
         this.title = this.allChapters.find(res => res).name;
         this.isLoading = false;
       }
     },
     getRelease(obj, infoChapter) {
-      console.log("position obj", infoChapter);
       this.stateArray(infoChapter);
       let release = Object.entries(obj).find(res => res)[1];
       this.$store.dispatch("showRelease", {
-        // obj: obj,
         chapter: infoChapter,
         link: release.link
       });
