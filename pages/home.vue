@@ -136,9 +136,6 @@ export default {
     this.getReleases();
   },
   watch: {
-    comics(debug) {
-      console.log("comic atual", debug);
-    },
     stateLoading(load) {
       this.$router.push("viewer");
     }
@@ -250,12 +247,6 @@ export default {
     showRelease(obj, chapter) {
       this.$store.dispatch("showRelease", { obj: obj, chapter: chapter });
     }
-    // async testeSearch() {
-    //   let formData = new FormData();
-    //   formData.append("search", "Solo");
-    //   let res = await this.$axios.post("/search", formData).catch(err => err);
-    //   console.log(res, "response");
-    // }
   }
 };
 </script>

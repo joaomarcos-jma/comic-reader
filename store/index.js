@@ -54,7 +54,7 @@ export const mutations = {
         state.infoComic = {
             name: comic.name || comic.series_name,
             id_serie: comic.id_serie,
-            image: comic.image || comic.featured_image
+            image: comic.image || comic.featured_image || comic.cover
         }
     },
     SET_LOADING(state, value) {

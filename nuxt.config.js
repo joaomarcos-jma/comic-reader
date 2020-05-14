@@ -5,6 +5,7 @@ export default {
   /*
   ** Headers of the page
   */
+
   head: {
     title: 'Comic Reader',
     meta: [
