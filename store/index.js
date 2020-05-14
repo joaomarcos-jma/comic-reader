@@ -12,7 +12,8 @@ export const state = () => ({
     infoComic: {},
     stateLoading: true,
     listCurrent: {},
-    chaptersList: {}
+    chaptersList: {},
+    images: []
 })
 
 export const mutations = {
@@ -64,6 +65,9 @@ export const mutations = {
     },
     CHAPTERS_LIST(state, value) {
         state.chaptersList = value
+    },
+    IMGS_LIST(state, value) {
+        state.images = value
     }
 }
 

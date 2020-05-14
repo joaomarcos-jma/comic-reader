@@ -16,7 +16,7 @@
 
     <v-footer
       color="#121212"
-      v-show="render && loadFiles.length > 0 && !isLoading"
+      v-show="loadFiles.length > 0 && !isLoading"
       :class="isMobile ? 'load-img' : 'text-center'"
     >
       <v-card class="flex" flat tile>
@@ -103,6 +103,22 @@ export default {
   mounted() {
     this.isLoading = true;
     this.render = false;
+    if (this.hashRelease) {
+      this.getScan();
+      this.render = false;
+      if (
+        [this.prev.chapter.number].includes(this.currentChapter.number) &&
+        ["0", "1"].includes(this.currentChapter.number)
+      ) {
+        this.visiblePrev = false;
+      }
+      if (
+        [1].includes(this.listCurrent.page) &&
+        [this.next.chapter.number].includes(this.currentChapter.number)
+      ) {
+        this.visibleNext = false;
+      }
+    }
   },
   watch: {
     hashRelease(value) {
@@ -138,6 +154,7 @@ export default {
         return this.goBack();
       }
       this.images = res.data.images;
+      this.$store.commit("IMGS_LIST", res.data.images);
       this.isLoading = false;
     },
     goBack() {
@@ -209,7 +226,7 @@ export default {
   },
   computed: {
     loadFiles() {
-      return this.images;
+      return this.$store.state.images;
     },
     release() {
       return this.$store.state.id_release;

@@ -38,6 +38,10 @@ export default {
   ** Plugins to load before mounting the App
   */
   plugins: [
+    {
+      src: '~/plugins/localStorage.js',
+      ssr: false
+    },
     '~/plugins/mask.js',
     '~/plugins/method.js',
   ],
