@@ -20,14 +20,7 @@
         </v-tabs>
       </template>
     </v-app-bar>
-    <v-app-bar
-      v-if="showMenu && !isMobile"
-      absolute
-      dark
-      hide-on-scroll
-      app
-      scroll-target="#scrolling-techniques-4"
-    >
+    <v-app-bar v-if="showMenu && !isMobile" absolute dark hide-on-scroll app>
       <v-spacer></v-spacer>
       <v-toolbar-title style="margin-top: 15px;">
         <v-avatar size="80">
@@ -40,7 +33,8 @@
         </v-tabs>
       </template>
       <v-spacer></v-spacer>
-      <v-btn x-large icon>
+      <search v-show="action" />
+      <v-btn @click="action = !action" x-large icon>
         <v-icon>mdi-magnify</v-icon>
       </v-btn>
     </v-app-bar>
@@ -53,13 +47,16 @@
 </template>
 
 <script>
+import Search from "~/components/Search";
 export default {
+  components: { Search },
   data: () => ({
     tab: null,
     clipped: false,
     drawer: false,
     fixed: false,
     sideNav: false,
+    action: false,
     items: [
       {
         title: "Home",

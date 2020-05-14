@@ -54,6 +54,9 @@
 <script>
 import Loading from "../components/Loading";
 import cloneDeep from "lodash/cloneDeep";
+import VueResource from "vue-resource";
+import Vue from "vue";
+Vue.use(VueResource);
 
 export default {
   scrollToTop: true,
@@ -93,6 +96,10 @@ export default {
     }, 1500);
   },
   watch: {
+    infoComic(comic) {
+      this.isLoading = true;
+      this.getAllChapters();
+    },
     page(index) {
       this.isLoading = true;
       this.getAllChapters(index);
@@ -103,7 +110,7 @@ export default {
     allChapters(chapter) {
       this.endAll = false;
       chapter.forEach(res => {
-        if (['0', '1'].includes(res.number)) {
+        if (["0", "1"].includes(res.number)) {
           this.endAll = true;
         }
       });
@@ -121,26 +128,30 @@ export default {
     }
   },
   methods: {
-    async getAllChapters(page = 1) {
-      let response = await this.$axios
+    getAllChapters(page = 1) {
+      Vue.http
         .get(
           `/all/chapters_list.json?page=${page}&id_serie=${this.infoComic.id_serie}`
         )
-        .catch(err => {
-          this.isLoading = false;
-          return err.response;
-        });
-      response.status !== 200 ? this.$router.push("home") : "";
-      if (response.data) {
-        this.allChapters = response.data.chapters;
-        let listCurrent = {
-          page: page,
-          all: this.allChapters
-        };
-        this.$store.commit("ALL_LIST", listCurrent);
-        this.title = this.allChapters.find(res => res).name;
-        this.isLoading = false;
-      }
+        .then(
+          res => {
+            res.status !== 200 ? this.$router.push("home") : "";
+            if (res.body) {
+              this.allChapters = res.body.chapters;
+              let listCurrent = {
+                page: page,
+                all: this.allChapters
+              };
+              this.$store.commit("ALL_LIST", listCurrent);
+              this.title = this.allChapters.find(res => res).name;
+              this.isLoading = false;
+            }
+          },
+          err => {
+            this.$router.push("home");
+            return err;
+          }
+        );
     },
     getRelease(obj, infoChapter) {
       this.stateArray(infoChapter);
