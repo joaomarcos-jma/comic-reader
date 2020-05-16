@@ -22,9 +22,18 @@
               </v-list-item-avatar>
 
               <v-list-item-content>
-                <span
-                  :style="isMobile ? 'font-size: 13pt' : 'font-size: 16pt'"
-                >{{'Capítulo ' + item.number}}</span>
+                <span :style="isMobile ? 'font-size: 13pt' : 'font-size: 16pt'">
+                  {{'Capítulo ' + item.number}}
+                  <v-chip
+                    v-if="moment(item.date_created).isBetween(dateYesterday, date)"
+                    class="ma-2"
+                    color="red"
+                    text-color="white"
+                  >
+                    <span class="font-weight-bold">Novo</span>
+                    <v-icon size="20" style="margin-top: -3px">mdi-star</v-icon>
+                  </v-chip>
+                </span>
                 <span class="hint-text">{{'Disponível em: ' + $mask.dateFormat(item.date_created)}}</span>
               </v-list-item-content>
 
@@ -55,6 +64,7 @@
 import Loading from "../components/Loading";
 import cloneDeep from "lodash/cloneDeep";
 import VueResource from "vue-resource";
+import moment from "moment";
 import Vue from "vue";
 Vue.use(VueResource);
 
@@ -68,26 +78,7 @@ export default {
     allChapters: [],
     title: "",
     endAll: false,
-    items: [
-      {
-        icon: "folder",
-        iconClass: "grey lighten-1 white--text",
-        title: "Photos",
-        subtitle: "Jan 9, 2014"
-      },
-      {
-        icon: "folder",
-        iconClass: "grey lighten-1 white--text",
-        title: "Recipes",
-        subtitle: "Jan 17, 2014"
-      },
-      {
-        icon: "folder",
-        iconClass: "grey lighten-1 white--text",
-        title: "Work",
-        subtitle: "Jan 28, 2014"
-      }
-    ]
+    moment: moment
   }),
   mounted() {
     this.isLoading = true;
@@ -125,6 +116,14 @@ export default {
     },
     stateLoading() {
       return this.$store.state.stateLoading;
+    },
+    date() {
+      return moment().toString();
+    },
+    dateYesterday() {
+      return moment()
+        .subtract(1, "days")
+        .toString();
     }
   },
   methods: {

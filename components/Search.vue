@@ -9,7 +9,7 @@
       class="mx-4"
       flat
       item-text="name"
-      :item-value="going ? '' : 'value'"
+      item-value="value"
       hide-no-data
       hide-details
       label="O que você gostaria de ler?"
@@ -50,12 +50,8 @@ export default {
       items: [],
       search: null,
       select: null,
-      comics: [],
-      going: false
+      comics: []
     };
-  },
-  mounted() {
-    this.going = false;
   },
   watch: {
     search(val) {
@@ -65,7 +61,6 @@ export default {
   methods: {
     goToList(item) {
       this.$store.commit("LIST_COMIC", item);
-      this.going = true;
       this.$router.push("list");
     },
     querySelections(v) {

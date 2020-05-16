@@ -19,6 +19,11 @@
           <v-tab v-for="item in items" :key="item.tab" :to="item.to">{{ item.title }}</v-tab>
         </v-tabs>
       </template>
+      <v-spacer></v-spacer>
+      <search v-show="action" />
+      <v-btn @click="action = !action" x-large icon>
+        <v-icon>mdi-magnify</v-icon>
+      </v-btn>
     </v-app-bar>
     <v-app-bar v-if="showMenu && !isMobile" absolute dark hide-on-scroll app>
       <v-spacer></v-spacer>

@@ -13,7 +13,7 @@
           show-arrows-on-hover
         >
           <v-carousel-item v-for="(release, i) of featured" :key="i">
-            <span class="font-weight-bold">Capítulo {{release.chapter.number}}</span>
+            <span style="font-size: 20pt" class="font-weight-black">Capítulo {{release.chapter.number}}</span>
             <div
               @click="goToList(release)"
               style="text-align: center"
@@ -44,11 +44,9 @@
                       <div style="width: 255px">
                         <span class="font-weight-bold">{{$method.trimString(item.name, 60)}}</span>
                       </div>
-                      <img
-                        @click="goToList(item)"
-                        style="height: 300px;width: 255px"
-                        :src="item.image"
-                      />
+                      <v-list-item @click="goToList(item)">
+                        <img style="height: 300px;width: 255px" :src="item.image" />
+                      </v-list-item>
                     </v-col>
 
                     <v-container>
@@ -70,9 +68,9 @@
                 </v-list>
               </v-card>
             </v-col>
-            <v-col order="1">
+            <!-- <v-col order="1">
               <v-card class="pa-2" outlined tile>Second, but last</v-card>
-            </v-col>
+            </v-col>-->
             <v-col order="12">
               <v-card class="pa-2" outlined tile>
                 <h3>Recomendado</h3>
