@@ -19,7 +19,8 @@
     "nuxt": "^2.0.0",
     "v-viewer": "^1.5.1",
     "vue-resource": "^1.5.1",
-    "vuex-persistedstate": "^3.0.1"
+    "vuex-persistedstate": "^3.0.1",
+    "@nuxtjs/vuetify": "^1.0.0"
   },
   "devDependencies": {
     "@fortawesome/fontawesome-free": "^5.13.0",
