@@ -1,38 +1,32 @@
 <template>
-  <v-content style="margin-top: -10px">
-    <v-layout class="text-center">
-      <v-overlay class="fill-height" :value="isLoading || !stateLoading">
-        <loading v-if="isLoading || !stateLoading" />
-      </v-overlay>
-      <v-flex
-        v-show="loadFiles.length > 0 && !isLoading"
-        :class="!isMobile ? 'load-img' : 'load-img-mobile'"
-      >
-        <div v-for="(src, i) in loadFiles" :src="src" :key="i" class="images" v-viewer>
-          <img class="load-img" :src="src" />
-        </div>
-      </v-flex>
-    </v-layout>
+  <v-lazy ssr-only>
+    <v-content style="margin-top: -10px">
+      <v-layout class="text-center">
+        <v-overlay class="fill-height" :value="isLoading || !stateLoading">
+          <loading v-if="isLoading || !stateLoading" />
+        </v-overlay>
+        <v-flex v-show="loadFiles.length > 0 && !isLoading">
+          <div v-for="(src, i) in loadFiles" :src="src" :key="i" class="images" v-viewer>
+            <img :class="!isMobile ? 'load-img' : 'load-img-mobile'" :src="src" />
+          </div>
+        </v-flex>
+      </v-layout>
 
-    <v-footer
-      color="#121212"
-      v-show="loadFiles.length > 0 && !isLoading"
-      :class="isMobile ? 'load-img' : 'text-center'"
-    >
-      <v-card class="flex" flat tile>
+      <v-footer
+        color="#121212"
+        v-show="loadFiles.length > 0 && !isLoading"
+        :class="isMobile ? 'load-img-mobile' : 'text-center'"
+      >
         <v-card-text>
           <v-list class="teal white--text text-center">
             <v-list-item>
-              <v-list-item-content>
+              <v-list-item-content v-if="!isMobile">
                 <div style="text-align: left;margin-left: 30px">
                   <v-btn @click="goBack()" text style="margin-right: 30px" dark>
                     <v-icon>fas fa-arrow-left</v-icon>
                   </v-btn>
                 </div>
               </v-list-item-content>
-
-              <!-- <v-spacer></v-spacer> -->
-
               <v-list-item-icon
                 v-if="visiblePrev"
                 style="margin-right: 5px"
@@ -53,12 +47,28 @@
                   <v-icon>fas fa-step-forward</v-icon>
                 </v-btn>
               </v-list-item-icon>
+              <v-list-item-icon v-if="!visibleNext">
+                <v-btn text>Último Capítulo</v-btn>
+              </v-list-item-icon>
               <v-spacer></v-spacer>
               <strong
                 style="font-size: 14pt"
                 class="subheading"
+                v-if="!isMobile"
               >{{$method.trimString(currentChapter.name, 25) + ' - Capítulo ' + currentChapter.number}}</strong>
             </v-list-item>
+            <v-list-item-content v-if="isMobile">
+              <strong
+                style="font-size: 14pt"
+                class="subheading"
+              >{{$method.trimString(currentChapter.name, 25) + ' - Capítulo ' + currentChapter.number}}</strong>
+
+              <div style="text-align: center;">
+                <v-btn @click="goBack()" text dark>
+                  <v-icon>fas fa-arrow-left</v-icon>
+                </v-btn>
+              </div>
+            </v-list-item-content>
           </v-list>
         </v-card-text>
 
@@ -77,9 +87,9 @@
           {{ new Date().getFullYear() }} —
           <strong>Comic Reader</strong>
         </v-card-text>
-      </v-card>
-    </v-footer>
-  </v-content>
+      </v-footer>
+    </v-content>
+  </v-lazy>
 </template>
 <script>
 import "viewerjs/dist/viewer.css";

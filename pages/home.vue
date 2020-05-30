@@ -1,115 +1,123 @@
 <template>
-  <v-content>
-    <v-overlay class="fill-height" :value="isLoading || !stateLoading">
-      <loading v-if="isLoading || !stateLoading" />
-    </v-overlay>
-    <v-layout v-show="!isLoading && releases.length">
-      <v-flex>
-        <v-carousel
-          style="margin-top: -100px"
-          height="250px"
-          cycle
-          hide-delimiter-background
-          show-arrows-on-hover
-        >
-          <v-carousel-item v-for="(release, i) of featured" :key="i">
-            <span style="font-size: 20pt" class="font-weight-black">Capítulo {{release.chapter.number}}</span>
-            <div
-              @click="goToList(release)"
-              style="text-align: center"
-              :class="isMobile ? 'carousel-mobile' : 'carousel'"
-            >
-              <v-img v-show="isMobile" :src="release.featured_image"></v-img>
-              <img v-show="!isMobile" :src="release.featured_image" />
-            </div>
-            <!-- <v-row class="fill-height" align="center" justify="center">
-            </v-row>-->
-          </v-carousel-item>
-        </v-carousel>
-        <v-container>
-          <v-row no-gutters>
-            <v-col>
-              <v-card class="pa-2" outlined tile>
-                <h3>Últimas Atualizações</h3>
-                <v-list subheader>
-                  <v-subheader>Enjoy</v-subheader>
-                  <v-row
-                    class="mb-6"
-                    no-gutters
-                    style="margin-bottom: 15px"
-                    v-for="(item, i) in releases"
-                    :key="i"
-                  >
-                    <v-col sm="5" md="8">
-                      <div style="width: 255px">
-                        <span class="font-weight-bold">{{$method.trimString(item.name, 60)}}</span>
-                      </div>
-                      <v-list-item @click="goToList(item)">
-                        <img style="height: 300px;width: 255px" :src="item.image" />
-                      </v-list-item>
-                    </v-col>
-
-                    <v-container>
-                      <div
-                        style="margin: 2px;margin-top: 5px;display: inline-block"
-                        v-for="(cap, i) in item.chapters"
-                        :key="i"
-                      >
-                        <v-btn
-                          @click="showRelease(item, cap)"
-                          style="margin-bottom: 5px"
-                          v-if="i < 6"
-                        >
-                          <span style="font-size:15pt" class="font-weight-bold">{{cap.number}}</span>
-                        </v-btn>
-                      </div>
-                    </v-container>
-                  </v-row>
-                </v-list>
-              </v-card>
-            </v-col>
-            <!-- <v-col order="1">
-              <v-card class="pa-2" outlined tile>Second, but last</v-card>
-            </v-col>-->
-            <v-col order="12">
-              <v-card class="pa-2" outlined tile>
-                <h3>Recomendado</h3>
-                <v-subheader v-if="!comics || !comics.length">Sem Recomendações no Momento</v-subheader>
-                <v-list
-                  v-if="comics && comics.length > 0 || comics.image"
-                  :style="!isMobile ? 'text-align: center' : ''"
-                  three-line
-                >
-                  <v-subheader>Enjoy</v-subheader>
-                  <template v-for="(item, index) in comics">
-                    <div v-if="item.image" :key="item.name">
-                      <span class="font-weight-bold">{{item.name}}</span>
-                    </div>
-
-                    <!-- <v-divider :key="index" inset></v-divider> -->
-
-                    <v-list-item
-                      v-if="item.image"
-                      @click="goToList(item)"
+  <v-lazy ssr-only>
+    <v-content>
+      <v-overlay class="fill-height" :value="isLoading || !stateLoading">
+        <loading v-if="isLoading || !stateLoading" />
+      </v-overlay>
+      <v-layout v-show="!isLoading && releases.length">
+        <v-flex>
+          <v-carousel
+            style="margin-top: -100px"
+            height="250px"
+            cycle
+            hide-delimiter-background
+            show-arrows-on-hover
+          >
+            <v-carousel-item v-for="(release, i) of featured" :key="i">
+              <span
+                style="font-size: 20pt"
+                class="font-weight-black"
+              >Capítulo {{release.chapter.number}}</span>
+              <div
+                @click="goToList(release)"
+                style="text-align: center"
+                :class="isMobile ? 'carousel-mobile' : 'carousel'"
+              >
+                <v-img v-show="isMobile" :src="release.featured_image"></v-img>
+                <img v-show="!isMobile" :src="release.featured_image" />
+              </div>
+              <!-- <v-row class="fill-height" align="center" justify="center">
+              </v-row>-->
+            </v-carousel-item>
+          </v-carousel>
+          <v-container>
+            <v-row no-gutters>
+              <v-col>
+                <v-card class="pa-2" outlined tile>
+                  <h3>Últimas Atualizações</h3>
+                  <v-list subheader>
+                    <v-subheader>Enjoy</v-subheader>
+                    <v-row
+                      class="mb-6"
+                      no-gutters
                       style="margin-bottom: 15px"
-                      :key="index"
+                      v-for="(item, i) in releases"
+                      :key="i"
                     >
-                      <img :class="isMobile ? 'favourites-mobile' : 'favourites'" :src="item.image" />
+                      <v-col sm="5" md="8">
+                        <div style="width: 255px">
+                          <span class="font-weight-bold">{{$method.trimString(item.name, 60)}}</span>
+                        </div>
+                        <v-list-item @click="goToList(item)">
+                          <img style="height: 300px;width: 255px" :src="item.image" />
+                        </v-list-item>
+                      </v-col>
 
-                      <v-list-item-content>
-                        <v-list-item-title v-html="item.title"></v-list-item-title>
-                        <v-list-item-subtitle v-html="item.subtitle"></v-list-item-subtitle>
-                      </v-list-item-content>
-                    </v-list-item>
-                  </template>
-                </v-list>
-              </v-card>
-            </v-col>
-          </v-row>
-        </v-container>
-      </v-flex>
-    </v-layout>
-  </v-content>
+                      <v-container>
+                        <div
+                          style="margin: 2px;margin-top: 5px;display: inline-block"
+                          v-for="(cap, i) in item.chapters"
+                          :key="i"
+                        >
+                          <v-btn
+                            @click="showRelease(item, cap)"
+                            style="margin-bottom: 5px"
+                            v-if="i < 6"
+                          >
+                            <span style="font-size:15pt" class="font-weight-bold">{{cap.number}}</span>
+                          </v-btn>
+                        </div>
+                      </v-container>
+                    </v-row>
+                  </v-list>
+                </v-card>
+              </v-col>
+              <!-- <v-col order="1">
+              <v-card class="pa-2" outlined tile>Second, but last</v-card>
+              </v-col>-->
+              <v-col order="12">
+                <v-card class="pa-2" outlined tile>
+                  <h3>Recomendado</h3>
+                  <v-subheader v-if="!comics || !comics.length">Sem Recomendações no Momento</v-subheader>
+                  <v-list
+                    v-if="comics && comics.length > 0 || comics.image"
+                    :style="!isMobile ? 'text-align: center' : ''"
+                    three-line
+                  >
+                    <v-subheader>Enjoy</v-subheader>
+                    <template v-for="(item, index) in comics">
+                      <div v-if="item.image" :key="item.name">
+                        <span class="font-weight-bold">{{item.name}}</span>
+                      </div>
+
+                      <!-- <v-divider :key="index" inset></v-divider> -->
+
+                      <v-list-item
+                        v-if="item.image"
+                        @click="goToList(item)"
+                        style="margin-bottom: 15px"
+                        :key="index"
+                      >
+                        <img
+                          :class="isMobile ? 'favourites-mobile' : 'favourites'"
+                          :src="item.image"
+                        />
+
+                        <v-list-item-content>
+                          <v-list-item-title v-html="item.title"></v-list-item-title>
+                          <v-list-item-subtitle v-html="item.subtitle"></v-list-item-subtitle>
+                        </v-list-item-content>
+                      </v-list-item>
+                    </template>
+                  </v-list>
+                </v-card>
+              </v-col>
+            </v-row>
+          </v-container>
+        </v-flex>
+      </v-layout>
+    </v-content>
+  </v-lazy>
 </template>
 <script>
 import Loading from "~/components/Loading";

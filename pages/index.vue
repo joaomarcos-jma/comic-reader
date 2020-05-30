@@ -1,4 +1,5 @@
 <template>
+ <v-lazy ssr-only>
   <div>
     <div v-if="render" :class="!isMobile ? 'align-welcome' : 'align-center'">
       <span class="font-weight-bold" :style="!isMobile ? 'font-size: 24pt' : 'font-size: 17pt'">Bem vindo ao,</span>
@@ -28,6 +29,7 @@
       </v-flex>
     </v-layout>
   </div>
+ </v-lazy>
 </template>
 
 <script>

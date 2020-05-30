@@ -1,54 +1,56 @@
 <template>
-  <v-app dark>
-    <v-app-bar
-      v-if="showMenu && isMobile"
-      dark
-      :class="{'transparent': !showNavbar}"
-      :hide-on-scroll="true"
-      :src="require('../static/solo.png')"
-      app
-    >
-      <v-toolbar-title class="text-center">
-        <v-avatar size="70">
-          <v-img :src="require('../static/logos/logo_oficial_comic_reader.png')"></v-img>
-        </v-avatar>
-      </v-toolbar-title>
+  <v-lazy ssr-only>
+    <v-app dark>
+      <v-app-bar
+        v-if="showMenu && isMobile"
+        dark
+        :class="{'transparent': !showNavbar}"
+        :hide-on-scroll="true"
+        :src="require('../static/solo.png')"
+        app
+      >
+        <v-toolbar-title class="text-center">
+          <v-avatar size="70">
+            <v-img :src="require('../static/logos/logo_oficial_comic_reader.png')"></v-img>
+          </v-avatar>
+        </v-toolbar-title>
 
-      <template v-slot:extension>
-        <v-tabs v-model="tab" align-with-title>
-          <v-tab v-for="item in items" :key="item.tab" :to="item.to">{{ item.title }}</v-tab>
-        </v-tabs>
-      </template>
-      <v-spacer></v-spacer>
-      <search v-show="action" />
-      <v-btn @click="action = !action" x-large icon>
-        <v-icon>mdi-magnify</v-icon>
-      </v-btn>
-    </v-app-bar>
-    <v-app-bar v-if="showMenu && !isMobile" absolute dark hide-on-scroll app>
-      <v-spacer></v-spacer>
-      <v-toolbar-title style="margin-top: 15px;">
-        <v-avatar size="80">
-          <v-img :src="require('../static/logos/logo_oficial_comic_reader.png')"></v-img>
-        </v-avatar>
-      </v-toolbar-title>
-      <template v-slot:extension>
-        <v-tabs style="margin-top: 3px;margin-left: 30%" v-model="tab" align-with-title>
-          <v-tab v-for="item in items" :key="item.tab" :to="item.to">{{ item.title }}</v-tab>
-        </v-tabs>
-      </template>
-      <v-spacer></v-spacer>
-      <search v-show="action" />
-      <v-btn @click="action = !action" x-large icon>
-        <v-icon>mdi-magnify</v-icon>
-      </v-btn>
-    </v-app-bar>
-    <v-content>
-      <v-container>
-        <nuxt />
-      </v-container>
-    </v-content>
-  </v-app>
+        <template v-slot:extension>
+          <v-tabs v-model="tab" align-with-title>
+            <v-tab v-for="item in items" :key="item.tab" :to="item.to">{{ item.title }}</v-tab>
+          </v-tabs>
+        </template>
+        <v-spacer></v-spacer>
+        <search v-show="action" />
+        <v-btn @click="action = !action" x-large icon>
+          <v-icon>mdi-magnify</v-icon>
+        </v-btn>
+      </v-app-bar>
+      <v-app-bar v-if="showMenu && !isMobile" absolute dark hide-on-scroll app>
+        <v-spacer></v-spacer>
+        <v-toolbar-title style="margin-top: 15px;">
+          <v-avatar size="80">
+            <v-img :src="require('../static/logos/logo_oficial_comic_reader.png')"></v-img>
+          </v-avatar>
+        </v-toolbar-title>
+        <template v-slot:extension>
+          <v-tabs style="margin-top: 3px;margin-left: 30%" v-model="tab" align-with-title>
+            <v-tab v-for="item in items" :key="item.tab" :to="item.to">{{ item.title }}</v-tab>
+          </v-tabs>
+        </template>
+        <v-spacer></v-spacer>
+        <search v-show="action" />
+        <v-btn @click="action = !action" x-large icon>
+          <v-icon>mdi-magnify</v-icon>
+        </v-btn>
+      </v-app-bar>
+      <v-content>
+        <v-container>
+          <nuxt />
+        </v-container>
+      </v-content>
+    </v-app>
+  </v-lazy>
 </template>
 
 <script>
