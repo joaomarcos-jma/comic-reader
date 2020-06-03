@@ -7,10 +7,28 @@
       <v-card max-width="1200" class="mx-auto" style="margin-top: -90px">
         <v-card-text>
           <v-list two-line subheader>
-            <span
-              style="font-size: 14pt;color: color: rgba(255, 255, 255, 0.7);"
-              inset
-            >{{infoComic.name}}</span>
+            <v-row>
+              <v-col>
+                <span
+                  style="font-size: 17pt;color: color: rgba(255, 255, 255, 0.7);"
+                  inset
+                  class="headline"
+                >{{infoComic.name}}</span>
+              </v-col>
+
+              <div class="text-right">
+                <div v-if="!isFav">
+                  <v-btn class="ma-2" text icon @click="addFavourite()">
+                    <v-icon color="orange" size="35">far fa-bookmark</v-icon>
+                  </v-btn>
+                </div>
+                <div v-if="isFav">
+                  <v-btn class="ma-2" text icon @click="removeFavourite()">
+                    <v-icon color="orange" size="35">fas fa-bookmark</v-icon>
+                  </v-btn>
+                </div>
+              </div>
+            </v-row>
 
             <v-list-item
               v-for="(item, i) in allChapters"
@@ -111,6 +129,16 @@ export default {
     infoComic() {
       return this.$store.state.infoComic;
     },
+    favourites() {
+      return this.$store.state.favourites;
+    },
+    isFav() {
+      return (
+        this.favourites.filter(res =>
+          [res.id_serie].includes(this.infoComic.id_serie)
+        ).length > 0
+      );
+    },
     isMobile() {
       return this.$store.state.isMobile;
     },
@@ -180,6 +208,12 @@ export default {
         }
       };
       this.$store.commit("CHAPTERS_LIST", chaptersList);
+    },
+    addFavourite() {
+      this.$store.commit("ADD_FAV_FAVOURITES", this.infoComic);
+    },
+    removeFavourite() {
+      this.$store.commit("RM_FAV_FAVOURITES", this.infoComic.id_serie);
     }
   }
 };

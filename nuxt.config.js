@@ -62,12 +62,13 @@ export default {
   axios: {
     proxy: true
   },
+  // leitor.net
   proxy: {
-    '/api/': { target: "https://leitor.net", pathRewrite: { '^/api/': '' }, changeOrigin: true },
-    '/scan/': { target: "https://leitor.net/leitor/pages/", pathRewrite: { '^/scan/': '' }, changeOrigin: true },
-    '/all/': { target: "https://leitor.net/series/", pathRewrite: { '^/all/': '' }, changeOrigin: true },
-    '/home/': { target: "https://leitor.net/home/", pathRewrite: { '^/home/': '' }, changeOrigin: true },
-    '/search': { target: "https://leitor.net/lib/search/series.json", pathRewrite: { '^/search': '' }, changeOrigin: true }
+    '/api/': { target: "https://mangalivre.net", pathRewrite: { '^/api/': '' }, changeOrigin: true },
+    '/scan/': { target: "https://mangalivre.net/leitor/pages/", pathRewrite: { '^/scan/': '' }, changeOrigin: true },
+    '/all/': { target: "https://mangalivre.net/series/", pathRewrite: { '^/all/': '' }, changeOrigin: true },
+    '/home/': { target: "https://mangalivre.net/home/", pathRewrite: { '^/home/': '' }, changeOrigin: true },
+    '/search': { target: "https://mangalivre.net/lib/search/series.json", pathRewrite: { '^/search': '' }, changeOrigin: true }
   },
   /*
   ** vuetify module configuration

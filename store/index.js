@@ -13,7 +13,8 @@ export const state = () => ({
     stateLoading: true,
     listCurrent: {},
     chaptersList: {},
-    images: []
+    images: [],
+    favourites: []
 })
 
 export const mutations = {
@@ -68,7 +69,27 @@ export const mutations = {
     },
     IMGS_LIST(state, value) {
         state.images = value
-    }
+    },
+    ADD_FAV_FAVOURITES(state, comic) {
+        if (comic) {
+            let favourite = {
+                name: comic.name || comic.series_name,
+                id_serie: comic.id_serie,
+                image: comic.image || comic.featured_image || comic.cover
+            }
+            state.favourites.push(favourite)
+        }
+    },
+    RM_FAV_FAVOURITES(state, id_serie) {
+        let comicIndex = null;
+        state.favourites.map((comic, index) => {
+            if (comic.id_serie === id_serie) {
+                comicIndex = index;
+            }
+        });
+        state.favourites.splice(comicIndex, 1);
+    },
+
 }
 
 export const actions = {

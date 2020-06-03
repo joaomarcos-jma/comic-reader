@@ -71,9 +71,14 @@ export default {
         id: 1
       },
       {
-        title: "Comics",
+        title: "Lendo",
         to: "/list",
         id: 2
+      },
+      {
+        title: "Favoritos",
+        to: "/favourites",
+        id: 3
       }
     ],
     miniVariant: false,
@@ -85,7 +90,8 @@ export default {
   }),
   mounted() {
     this.onResize();
-    this.checkItemsTab();
+    this.checkItemComic();
+    this.checkItemFav();
     window.addEventListener("resize", this.onResize, { passive: true });
     window.addEventListener("scroll", this.onScroll);
   },
@@ -97,11 +103,14 @@ export default {
   },
   watch: {
     infoComic(value) {
-      value ? this.checkItemsTab() : "";
+      value ? this.checkItemComic() : "";
+    },
+    favourites() {
+      this.checkItemFav();
     }
   },
   methods: {
-    checkItemsTab() {
+    checkItemComic() {
       if (this.infoComic && this.infoComic.id_serie) {
         let routeList = this.items.find(res => res.id === 2);
         return !routeList
@@ -115,6 +124,23 @@ export default {
       let index;
       this.items.map((res, i) => {
         return res.id === 2 ? (index = i) : "";
+      });
+      index ? this.items.splice(index, 1) : "";
+    },
+    checkItemFav() {
+      if (this.favourites) {
+        let routeList = this.items.find(res => res.id === 3);
+        return !routeList
+          ? this.items.push({
+              title: "Favoritos",
+              to: "/favourites",
+              id: 3
+            })
+          : "";
+      }
+      let index;
+      this.items.map((res, i) => {
+        return res.id === 3 ? (index = i) : "";
       });
       index ? this.items.splice(index, 1) : "";
     },
@@ -146,6 +172,9 @@ export default {
     },
     infoComic() {
       return this.$store.state.infoComic;
+    },
+    favourites() {
+      return this.$store.state.favourites.length > 0;
     }
   }
 };
