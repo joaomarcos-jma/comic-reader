@@ -97,24 +97,18 @@ export const actions = {
         let chapter = payload.chapter;
         payload.link ? chapter['url'] = payload.link : chapter['url'] = chapter.url
         let base = chapter.url;
-        let result_1 = base.substr(1);
-        let root_2 = result_1.search("/");
-        /* a barra nao conta na busca, retorna uma posiçao antes dela */
-        let result_2 = result_1.substr(root_2 + 1);
-        let root_3 = result_2.search("/");
-        let result_3 = result_2.substr(root_3 + 1);
-        let final_root = result_3.search("/");
-        let id_release = result_3.substr(result_3, final_root);
+        let startSearch = base.search('/online/')
+        let paramStr = base.substr(startSearch + 1).replace('online/', '')
+        let final = paramStr.search('/')
+        let value = paramStr.substr(paramStr, final)
+        let id_release = value;
         commit("SET_LOADING", false)
         let response = await this.$axios.get(`/api/${chapter.url}`).catch(err => {
             commit("SET_LOADING", true)
             return err.response;
         });
-        if (response.status !== 200) {
-            console.log('here error ===danger=== ')
-            return;
-        }
-        let link = JSON.stringify(response.headers.link);
+        if (response.status !== 200) return;
+        let link = JSON.stringify(response.data);
         let initialSearch = link.search("&token=");
         let result = link.substr(initialSearch);
         let finalSearch = result.search("&id_release");
