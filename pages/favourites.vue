@@ -79,5 +79,6 @@ export default {
 .favourites {
   height: 280px;
   width: 290px;
+  cursor: pointer;
 }
 </style>
