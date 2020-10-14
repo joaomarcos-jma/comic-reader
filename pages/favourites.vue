@@ -3,7 +3,7 @@
     <v-layout>
       <v-container>
         <v-row class="text-center">
-          <v-col :order="i" v-for="(fav, i) in allFavourites" :key="i">
+          <v-col :order="i" v-for="(fav, i) in allFavourites" :key="i" cols="12" md="4" sm="5">
             <!-- <div class="text-right" style="position: relative;">
             <v-btn class="ma-2" text icon @click="removeFavourite(fav)">
               <v-icon color="orange" size="35">fas fa-bookmark</v-icon>

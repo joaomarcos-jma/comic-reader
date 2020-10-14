@@ -23,6 +23,12 @@
                   </v-btn>
                 </div>
                 <div v-if="isFav">
+                  <v-btn
+                    @click="lastRead"
+                    dark
+                    v-if="infoComic.log && infoComic.log.next"
+                    outlined
+                  >Continuar Lendo</v-btn>
                   <v-btn class="ma-2" text icon @click="removeFavourite()">
                     <v-icon color="orange" size="35">fas fa-bookmark</v-icon>
                   </v-btn>
@@ -180,6 +186,21 @@ export default {
           }
         );
     },
+
+    lastRead() {
+      let log = this.infoComic.log.next;
+      let infoChapter = {
+        name: log.chapter.name,
+        number: log.chapter.number,
+        index: log.indexChapter
+      };
+      this.stateArray(infoChapter);
+      this.$store.dispatch("showRelease", {
+        chapter: infoChapter,
+        link: log.link
+      });
+    },
+
     getRelease(obj, infoChapter) {
       this.stateArray(infoChapter);
       let release = Object.entries(obj).find(res => res)[1];

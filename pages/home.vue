@@ -7,7 +7,7 @@
       <v-layout v-show="!isLoading && releases.length">
         <v-flex>
           <v-carousel
-            style="margin-top: -100px"
+            style="margin-top: -100px;cursor: pointer"
             height="250px"
             cycle
             hide-delimiter-background

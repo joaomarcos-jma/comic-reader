@@ -1,21 +1,31 @@
 import colors from 'vuetify/es5/util/colors'
 
 export default {
-  mode: 'universal',
+  mode: 'spa',
   /*
-  ** Headers of the page
-  */
-
+   ** Headers of the page
+   */
+  target: 'server',
   head: {
     title: 'Comic Reader',
-    meta: [
-      { charset: 'utf-8' },
-      { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-      { hid: 'description', name: 'description', content: process.env.npm_package_description || '' }
+    meta: [{
+        charset: 'utf-8'
+      },
+      {
+        name: 'viewport',
+        content: 'width=device-width, initial-scale=1'
+      },
+      {
+        hid: 'description',
+        name: 'description',
+        content: process.env.npm_package_description || ''
+      }
     ],
-    link: [
-      { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }
-    ]
+    link: [{
+      rel: 'icon',
+      type: 'image/x-icon',
+      href: '/favicon.ico'
+    }]
   },
   // router: {
   //   scrollBehavior(to) {
@@ -26,20 +36,21 @@ export default {
   //   }
   // },
   /*
-  ** Customize the progress-bar color
-  */
-  loading: { color: '#fff' },
+   ** Customize the progress-bar color
+   */
+  loading: {
+    color: '#fff'
+  },
   /*
-  ** Global CSS
-  */
+   ** Global CSS
+   */
   css: [
     '@fortawesome/fontawesome-free/css/all.css'
   ],
   /*
-  ** Plugins to load before mounting the App
-  */
-  plugins: [
-    {
+   ** Plugins to load before mounting the App
+   */
+  plugins: [{
       src: '~/plugins/localStorage.js',
       ssr: false
     },
@@ -47,33 +58,64 @@ export default {
     '~/plugins/method.js',
   ],
   /*
-  ** Nuxt.js dev-modules
-  */
+   ** Nuxt.js dev-modules
+   */
   buildModules: [
     '@nuxtjs/vuetify',
   ],
   /*
-  ** Nuxt.js modules
-  */
+   ** Nuxt.js modules
+   */
   modules: [
     '@nuxtjs/axios',
-    '@nuxtjs/proxy'
+    '@nuxtjs/proxy',
+    '@nuxtjs/pwa',
   ],
   axios: {
     proxy: true
   },
   // leitor.net
   proxy: {
-    '/api/': { target: "https://mangalivre.net", pathRewrite: { '^/api/': '' }, changeOrigin: true },
-    '/scan/': { target: "https://mangalivre.net/leitor/pages/", pathRewrite: { '^/scan/': '' }, changeOrigin: true },
-    '/all/': { target: "https://mangalivre.net/series/", pathRewrite: { '^/all/': '' }, changeOrigin: true },
-    '/home/': { target: "https://mangalivre.net/home/", pathRewrite: { '^/home/': '' }, changeOrigin: true },
-    '/search': { target: "https://mangalivre.net/lib/search/series.json", pathRewrite: { '^/search': '' }, changeOrigin: true }
+    '/api/': {
+      target: "https://mangalivre.net",
+      pathRewrite: {
+        '^/api/': ''
+      },
+      changeOrigin: true
+    },
+    '/scan/': {
+      target: "https://mangalivre.net/leitor/pages/",
+      pathRewrite: {
+        '^/scan/': ''
+      },
+      changeOrigin: true
+    },
+    '/all/': {
+      target: "https://mangalivre.net/series/",
+      pathRewrite: {
+        '^/all/': ''
+      },
+      changeOrigin: true
+    },
+    '/home/': {
+      target: "https://mangalivre.net/home/",
+      pathRewrite: {
+        '^/home/': ''
+      },
+      changeOrigin: true
+    },
+    '/search': {
+      target: "https://mangalivre.net/lib/search/series.json",
+      pathRewrite: {
+        '^/search': ''
+      },
+      changeOrigin: true
+    }
   },
   /*
-  ** vuetify module configuration
-  ** https://github.com/nuxt-community/vuetify-module
-  */
+   ** vuetify module configuration
+   ** https://github.com/nuxt-community/vuetify-module
+   */
   vuetify: {
     customVariables: ['~/assets/variables.scss'],
     icons: {
@@ -94,17 +136,27 @@ export default {
       }
     }
   },
+  pwa: {
+    icon: {
+      iconSrc: './static/icon.png'
+    },
+    manifest: {
+      name: 'Comic Reader',
+      short_name: 'Comic Reader',
+      lang: 'en',
+      display: 'standalone',
+    },
+  },
   /*
-  ** Build configuration
-  */
+   ** Build configuration
+   */
   build: {
     transpile: [
       "epic-spinners"
     ],
     /*
-    ** You can extend webpack config here
-    */
-    extend(config, ctx) {
-    }
+     ** You can extend webpack config here
+     */
+    extend(config, ctx) {}
   }
 }

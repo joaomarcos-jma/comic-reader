@@ -198,6 +198,7 @@ export default {
               indexChapter: this.chaptersList.current.index
             });
         chaptersList["next"] = this.chaptersList.next;
+        chaptersList["active"] = 1;
         this.$store.commit("CHAPTERS_LIST", chaptersList);
         return;
       }
@@ -231,6 +232,7 @@ export default {
           link: this.$method.releaseTransform(nextChapter.obj.releases).link,
           indexChapter: nextChapter.index
         });
+      chaptersList["active"] = 1;
       this.$store.commit("CHAPTERS_LIST", chaptersList);
     }
   },
