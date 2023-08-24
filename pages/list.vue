@@ -1,5 +1,5 @@
 <template>
-  <v-content>
+  <v-main>
     <v-overlay class="fill-height" :value="isLoading || !stateLoading">
       <loading v-if="isLoading || !stateLoading" />
     </v-overlay>
@@ -81,7 +81,7 @@
         ></v-pagination>
       </div>
     </v-container>
-  </v-content>
+  </v-main>
 </template>
 
 <script>

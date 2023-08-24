@@ -1,6 +1,6 @@
 <template>
   <v-lazy ssr-only>
-    <v-content>
+    <v-main>
       <v-overlay class="fill-height" :value="isLoading || !stateLoading">
         <loading v-if="isLoading || !stateLoading" />
       </v-overlay>
@@ -116,7 +116,7 @@
           </v-container>
         </v-flex>
       </v-layout>
-    </v-content>
+    </v-main>
   </v-lazy>
 </template>
 <script>

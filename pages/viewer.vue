@@ -1,13 +1,22 @@
 <template>
   <v-lazy ssr-only>
-    <v-content style="margin-top: -10px">
+    <v-main style="margin-top: -10px">
       <v-layout class="text-center">
         <v-overlay class="fill-height" :value="isLoading || !stateLoading">
           <loading v-if="isLoading || !stateLoading" />
         </v-overlay>
-        <v-flex v-show="loadFiles.length > 0 && !isLoading">
-          <div v-for="(src, i) in loadFiles" :src="src" :key="i" class="images" v-viewer>
-            <img :class="!isMobile ? 'load-img' : 'load-img-mobile'" :src="src" />
+        <v-flex v-show="images.length > 0 && !isLoading">
+          <div
+            v-for="(src, i) in images"
+            :src="src"
+            :key="i"
+            class="images"
+            v-viewer
+          >
+            <img
+              :class="!isMobile ? 'load-img' : 'load-img-mobile'"
+              :src="src.legacy"
+            />
           </div>
         </v-flex>
       </v-layout>
@@ -21,7 +30,7 @@
           <v-list class="teal white--text text-center">
             <v-list-item>
               <v-list-item-content v-if="!isMobile">
-                <div style="text-align: left;margin-left: 30px">
+                <div style="text-align: left; margin-left: 30px">
                   <v-btn @click="goBack()" text style="margin-right: 30px" dark>
                     <v-icon>fas fa-arrow-left</v-icon>
                   </v-btn>
@@ -55,15 +64,21 @@
                 style="font-size: 14pt"
                 class="subheading"
                 v-if="!isMobile"
-              >{{$method.trimString(currentChapter.name, 25) + ' - Capítulo ' + currentChapter.number}}</strong>
+                >{{
+                  $method.trimString(currentChapter.name, 25) +
+                  " - Capítulo " +
+                  currentChapter.number
+                }}</strong
+              >
             </v-list-item>
             <v-list-item-content v-if="isMobile">
-              <strong
-                style="font-size: 14pt"
-                class="subheading"
-              >{{$method.trimString(currentChapter.name, 25) + ' - Capítulo ' + currentChapter.number}}</strong>
+              <strong style="font-size: 14pt" class="subheading">{{
+                $method.trimString(currentChapter.name, 25) +
+                " - Capítulo " +
+                currentChapter.number
+              }}</strong>
 
-              <div style="text-align: center;">
+              <div style="text-align: center">
                 <v-btn @click="goBack()" text dark>
                   <v-icon>fas fa-arrow-left</v-icon>
                 </v-btn>
@@ -88,7 +103,7 @@
           <strong>Comic Reader</strong>
         </v-card-text>
       </v-footer>
-    </v-content>
+    </v-main>
   </v-lazy>
 </template>
 <script>
@@ -108,7 +123,7 @@ export default {
     visiblePrev: true,
     visibleNext: true,
     icons: ["mdi-github"],
-    linkOwner: "https://github.com/joaomarcos-jma"
+    linkOwner: "https://github.com/joaomarcos-jma",
   }),
   mounted() {
     this.isLoading = true;
@@ -150,13 +165,13 @@ export default {
       ) {
         this.visibleNext = false;
       }
-    }
+    },
   },
   methods: {
     async getScan() {
       let res = await this.$axios
         .get(`/scan/${this.release}.json?key=${this.hashRelease}`)
-        .catch(err => {
+        .catch((err) => {
           this.isLoading = false;
           return err.response;
         });
@@ -164,6 +179,7 @@ export default {
         return this.goBack();
       }
       this.images = res.data.images;
+      console.log("images", this.images)
       this.$store.commit("IMGS_LIST", res.data.images);
       this.isLoading = false;
     },
@@ -181,10 +197,10 @@ export default {
       this.render = false;
       this.$store.dispatch("showRelease", {
         chapter: infoChapter.chapter,
-        link: infoChapter.link
+        link: infoChapter.link,
       });
       let chaptersList = {
-        current: infoChapter
+        current: infoChapter,
       };
       if (
         [0].includes(infoChapter.indexChapter) &&
@@ -195,7 +211,7 @@ export default {
           : (chaptersList["prev"] = {
               chapter: this.chaptersList.current,
               link: this.chaptersList.current.url,
-              indexChapter: this.chaptersList.current.index
+              indexChapter: this.chaptersList.current.index,
             });
         chaptersList["next"] = this.chaptersList.next;
         chaptersList["active"] = 1;
@@ -225,16 +241,16 @@ export default {
       (chaptersList["prev"] = {
         chapter: prevChapter.obj,
         link: this.$method.releaseTransform(prevChapter.obj.releases).link,
-        indexChapter: prevChapter.index
+        indexChapter: prevChapter.index,
       }),
         (chaptersList["next"] = {
           chapter: nextChapter.obj,
           link: this.$method.releaseTransform(nextChapter.obj.releases).link,
-          indexChapter: nextChapter.index
+          indexChapter: nextChapter.index,
         });
       chaptersList["active"] = 1;
       this.$store.commit("CHAPTERS_LIST", chaptersList);
-    }
+    },
   },
   computed: {
     loadFiles() {
@@ -266,8 +282,8 @@ export default {
     },
     stateLoading() {
       return this.$store.state.stateLoading;
-    }
-  }
+    },
+  },
 };
 </script>
 <style>

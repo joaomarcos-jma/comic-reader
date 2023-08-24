@@ -119,14 +119,19 @@ export const actions = {
       commit("SET_LOADING", true)
       return err.response;
     });
+    console.log("response", response)
     if (response.status !== 200) return;
     let link = JSON.stringify(response.data);
-    let initialSearch = link.search("&token=");
+    let initialSearch = link.search("READER_TOKEN = '");
     let result = link.substr(initialSearch);
-    let finalSearch = result.search("&id_release");
+    let finalSearch = result.search("window.READER_SERIES_COVER");
     let resultHash = link.substr(initialSearch, finalSearch);
-    let hashRelease = resultHash.split("&token=")[1];
-    commit("SET_HASH", hashRelease);
+    let hashRelease = resultHash.split("READER_TOKEN = '")[1];
+
+    let findChar = hashRelease.search("';");
+    let authToken = hashRelease.substr(0, findChar);
+
+    commit("SET_HASH", authToken);
     commit("SET_RELEASE", id_release);
     commit("SET_LOADING", true)
     commit("INFO_CHAPTER", {

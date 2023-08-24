@@ -44,11 +44,11 @@
           <v-icon>mdi-magnify</v-icon>
         </v-btn>
       </v-app-bar>
-      <v-content>
+      <v-main>
         <v-container>
           <nuxt />
         </v-container>
-      </v-content>
+      </v-main>
     </v-app>
   </v-lazy>
 </template>
