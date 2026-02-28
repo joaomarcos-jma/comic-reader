@@ -19,7 +19,7 @@
     "epic-spinners": "^1.1.0",
     "lodash.clonedeep": "^4.5.0",
     "moment": "^2.25.3",
-    "nuxt": "^2.0.0",
+    "nuxt": "^2.17.1",
     "v-viewer": "^1.5.1",
     "vue-resource": "^1.5.1",
     "vuex-persistedstate": "^3.0.1"
